@@ -1,99 +1,3 @@
-├──enviroments
-├──src
-    │   app.controller.spec.ts
-    │   app.controller.ts
-    │   app.module.ts
-    │   app.service.ts
-    │   main.ts
-    ├──common
-    │   │   constant.ts
-    │   └──repository
-    │       │   repository.ts
-    │       └──interface
-    │               IRepository.ts
-    ├──config
-    │       configuration.ts
-    ├──interceptor
-    │       logging.interceptor.ts
-    │       tranform.interceptor.ts
-    └──modules
-        ├──auth
-        │   │   auth.guard.ts
-        │   │   auth.module.ts
-        │   ├──controller
-        │   │       auth.controller.ts
-        │   ├──domain
-        │   │   ├──entities
-        │   │   │       permission.entity.ts
-        │   │   │       role.entity.ts
-        │   │   └──interface
-        │   │           IPermission.interface.ts
-        │   │           IRole.interface.ts
-        │   ├──infracstructure
-        │   │   └──repository
-        │   └──service
-        │           auth.service.ts
-        ├──event
-        │   │   event.module.ts
-        │   ├──controller
-        │   │       event.controller.ts
-        │   ├──domain
-        │   │   ├──entities
-        │   │   │       event.entities.ts
-        │   │   └──interface
-        │   │           IEvent.interface.ts
-        │   ├──dto
-        │   │       event.dto.ts
-        │   ├──infracstructure
-        │   │       event.repository.ts
-        │   └──service
-        │           event.service.ts
-        ├──payment
-        │   │   payment.module.ts
-        │   ├──controller
-        │   │       payment.controller.ts
-        │   ├──domain
-        │   │   ├──entities
-        │   │   │       bank.entity.ts
-        │   │   │       order.entity.ts
-        │   │   └──interface
-        │   │           IOrder.interface.ts
-        │   ├──dto
-        │   │       payment.dto.ts
-        │   ├──infracstructure
-        │   │       payment.repository.ts
-        │   └──service
-        │           payment.service.ts
-        ├──ticket
-        │   │   ticket.module.ts
-        │   ├──controller
-        │   │       ticket.controller.ts
-        │   ├──domain
-        │   │   ├──entities
-        │   │   │       ticket.entities.ts
-        │   │   └──interface
-        │   │           ITicket.interface.ts
-        │   ├──dto
-        │   │       ticket.dto.ts
-        │   ├──infracstructure
-        │   │       ticket.repository.ts
-        │   └──service
-        │           ticket.service.ts
-        └──user
-            │   user.module.ts
-            ├──controller
-            │       user.controller.ts
-            ├──domain
-            │   ├──entities
-            │   │       user.entity.ts
-            │   └──interface
-            │           IUser.interface.ts
-            ├──dto
-            │       user.dto.ts
-            ├──infracstructure
-            │       user.repository.ts
-            └──service
-                    user.service.ts
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
@@ -154,7 +58,105 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
-
+Code Structure
+```
+├──environments
+├──src
+    │   app.controller.spec.ts
+    │   app.controller.ts
+    │   app.module.ts
+    │   app.service.ts
+    │   main.ts
+    ├──common
+    │   │   constant.ts
+    │   └──repository
+    │       │   repository.ts
+    │       └──interface
+    │               IRepository.ts
+    ├──config
+    │       configuration.ts
+    ├──interceptor
+    │       logging.interceptor.ts
+    │       tranform.interceptor.ts
+    └──modules
+        ├──auth
+        │   │   auth.guard.ts
+        │   │   auth.module.ts
+        │   ├──controller
+        │   │       auth.controller.ts
+        │   ├──domain
+        │   │   ├──entities
+        │   │   │       permission.entity.ts
+        │   │   │       role.entity.ts
+        │   │   └──interface
+        │   │           IPermission.interface.ts
+        │   │           IRole.interface.ts
+        │   ├──infrastructure
+        │   │   └──repository
+        │   └──service
+        │           auth.service.ts
+        ├──event
+        │   │   event.module.ts
+        │   ├──controller
+        │   │       event.controller.ts
+        │   ├──domain
+        │   │   ├──entities
+        │   │   │       event.entities.ts
+        │   │   └──interface
+        │   │           IEvent.interface.ts
+        │   ├──dto
+        │   │       event.dto.ts
+        │   ├──infrastructure
+        │   │       event.repository.ts
+        │   └──service
+        │           event.service.ts
+        ├──payment
+        │   │   payment.module.ts
+        │   ├──controller
+        │   │       payment.controller.ts
+        │   ├──domain
+        │   │   ├──entities
+        │   │   │       bank.entity.ts
+        │   │   │       order.entity.ts
+        │   │   └──interface
+        │   │           IOrder.interface.ts
+        │   ├──dto
+        │   │       payment.dto.ts
+        │   ├──infrastructure
+        │   │       payment.repository.ts
+        │   └──service
+        │           payment.service.ts
+        ├──ticket
+        │   │   ticket.module.ts
+        │   ├──controller
+        │   │       ticket.controller.ts
+        │   ├──domain
+        │   │   ├──entities
+        │   │   │       ticket.entities.ts
+        │   │   └──interface
+        │   │           ITicket.interface.ts
+        │   ├──dto
+        │   │       ticket.dto.ts
+        │   ├──infrastructure
+        │   │       ticket.repository.ts
+        │   └──service
+        │           ticket.service.ts
+        └──user
+            │   user.module.ts
+            ├──controller
+            │       user.controller.ts
+            ├──domain
+            │   ├──entities
+            │   │       user.entity.ts
+            │   └──interface
+            │           IUser.interface.ts
+            ├──dto
+            │       user.dto.ts
+            ├──infrastructure
+            │       user.repository.ts
+            └──service
+                    user.service.ts
+```
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
