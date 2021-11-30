@@ -1,9 +1,9 @@
-import { GenderEnum } from '../enum/gender.enum';
+import { GenderEnum } from '../enums/gender.enum';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
-import { RoleEntity } from 'src/module/auth/domain/entity/role.entity';
-import { AppBaseEntity } from 'src/common/entity/entity';
-import { EventEntity } from 'src/module/event/domain/entity/event.entity';
-import { OrderEntity } from 'src/module/payment/domain/entity/order.entity';
+import { RoleEntity } from 'src/modules/auth/domain/entities/role.entity';
+import { AppBaseEntity } from 'src/common/entities/entity';
+import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
+import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 @Entity('User')
 export class UserEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })

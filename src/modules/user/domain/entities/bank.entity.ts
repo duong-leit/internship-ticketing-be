@@ -1,5 +1,5 @@
-import { AppBaseEntity } from 'src/common/entity/entity';
-import { OrderEntity } from 'src/module/payment/domain/entity/order.entity';
+import { AppBaseEntity } from 'src/common/entities/entity';
+import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
 

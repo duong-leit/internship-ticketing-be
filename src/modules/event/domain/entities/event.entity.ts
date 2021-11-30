@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
-import { UserEntity } from 'src/module/user/domain/entity/user.entity';
+import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 import { EventStatusEnum } from '../enums/eventStatus.enum';
-import { AppBaseEntity } from 'src/common/entity/entity';
+import { AppBaseEntity } from 'src/common/entities/entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 200 })

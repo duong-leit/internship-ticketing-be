@@ -1,4 +1,4 @@
-import { AppBaseEntity } from 'src/common/entity/entity';
+import { AppBaseEntity } from 'src/common/entities/entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { EventEntity } from './event.entity';
 

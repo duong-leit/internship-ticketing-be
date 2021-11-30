@@ -1,9 +1,9 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from 'src/module/user/domain/entity/user.entity';
-import { BankEntity } from 'src/module/user/domain/entity/bank.entity';
+import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
+import { BankEntity } from 'src/modules/user/domain/entities/bank.entity';
 import { OrderStatusEnum } from '../enums/orderStatus.enum';
-import { AppBaseEntity } from 'src/common/entity/entity';
-import { TicketEntity } from 'src/module/ticket/domain/entity/ticket.entity';
+import { AppBaseEntity } from 'src/common/entities/entity';
+import { TicketEntity } from 'src/modules/ticket/domain/entities/ticket.entity';
 
 @Entity('Order')
 export class OrderEntity extends AppBaseEntity {
