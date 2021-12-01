@@ -3,9 +3,8 @@ import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { BankEntity } from 'src/modules/user/domain/entities/bank.entity';
 import { OrderStatusEnum } from '../enums/orderStatus.enum';
 import { AppBaseEntity } from 'src/common/entities/entity';
-import { TicketEntity } from 'src/modules/ticket/domain/entities/ticket.entity';
 import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
-import { TicketDetailEntity } from './ticketDetail.entity';
+import { OrderDetailEntity} from './orderDetail.entity';
 
 @Entity('Order')
 export class OrderEntity extends AppBaseEntity {
@@ -30,6 +29,6 @@ export class OrderEntity extends AppBaseEntity {
   @ManyToOne(() => BankEntity, (account: BankEntity) => account.id)
   bank: BankEntity;
 
-  @OneToMany(() => TicketDetailEntity, (ticketDetail: TicketDetailEntity) => ticketDetail.order)
-  ticketDetail: TicketDetailEntity[];
+  @OneToMany(() => OrderDetailEntity, (orderDetail: OrderDetailEntity) => orderDetail.id)
+  orderDetail: OrderDetailEntity[];
 }
