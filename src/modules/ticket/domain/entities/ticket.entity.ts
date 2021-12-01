@@ -8,8 +8,8 @@ export class TicketEntity extends AppBaseEntity {
   @ManyToOne(() => EventEntity, (event: EventEntity) => event.id, { nullable: false })
   event!: EventEntity;
 
-  // @Column({ type: 'enum', enum: TicketStatusEnum, default: TicketStatusEnum.Ready })
-  // status: TicketStatusEnum;
+  @Column({ type: 'enum', enum: TicketStatusEnum, default: TicketStatusEnum.Ready })
+  status: TicketStatusEnum;
 
   @Column({ type: 'varchar', length: 510, nullable: false })
   nftToken!: string;
