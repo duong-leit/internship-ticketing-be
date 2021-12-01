@@ -60,7 +60,11 @@ $ npm run test:cov
 ```
 Code Structure
 ```
+<<<<<<< HEAD
 ├──enviroments
+=======
+├──environments
+>>>>>>> 2f16a5e349a19ffa18caa4eda72a7887c9c9a43d
 ├──src
     │   app.controller.spec.ts
     │   app.controller.ts
@@ -91,7 +95,7 @@ Code Structure
         │   │   └──interface
         │   │           IPermission.interface.ts
         │   │           IRole.interface.ts
-        │   ├──infracstructure
+        │   ├──infrastructure
         │   │   └──repository
         │   └──service
         │           auth.service.ts
@@ -106,7 +110,7 @@ Code Structure
         │   │           IEvent.interface.ts
         │   ├──dto
         │   │       event.dto.ts
-        │   ├──infracstructure
+        │   ├──infrastructure
         │   │       event.repository.ts
         │   └──service
         │           event.service.ts
@@ -122,7 +126,7 @@ Code Structure
         │   │           IOrder.interface.ts
         │   ├──dto
         │   │       payment.dto.ts
-        │   ├──infracstructure
+        │   ├──infrastructure
         │   │       payment.repository.ts
         │   └──service
         │           payment.service.ts
@@ -137,7 +141,7 @@ Code Structure
         │   │           ITicket.interface.ts
         │   ├──dto
         │   │       ticket.dto.ts
-        │   ├──infracstructure
+        │   ├──infrastructure
         │   │       ticket.repository.ts
         │   └──service
         │           ticket.service.ts
@@ -152,7 +156,7 @@ Code Structure
             │           IUser.interface.ts
             ├──dto
             │       user.dto.ts
-            ├──infracstructure
+            ├──infrastructure
             │       user.repository.ts
             └──service
                     user.service.ts

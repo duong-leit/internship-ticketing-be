@@ -6,5 +6,7 @@ export default () => ({
     name: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USER,
     password: `${process.env.DATABASE_PASSWORD}`,
+    sync: process.env.DATABASE_SYNCHRONIZE === 'true',
+    autoLoadEntities: process.env.DATABASE_AUTOLOADENTITIES === 'true',
   },
 });
