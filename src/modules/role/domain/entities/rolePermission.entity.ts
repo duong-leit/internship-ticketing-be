@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { PermissionEntity } from './permission.entity';
 import { RoleEntity } from './role.entity';
+
+
 @Entity('RolePermission')
 export class RolePermissionEntity {
   @PrimaryGeneratedColumn('uuid')

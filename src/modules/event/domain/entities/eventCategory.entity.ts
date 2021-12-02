@@ -1,6 +1,7 @@
 import { AppBaseEntity } from 'src/common/entities/entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { EventEntity } from './event.entity';
+
 
 @Entity('EventCategory')
 export class EventCategoryEntity extends AppBaseEntity {
