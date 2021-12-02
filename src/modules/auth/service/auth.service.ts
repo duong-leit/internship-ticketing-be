@@ -1,0 +1,26 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserRepository } from 'src/modules/user/infrastructure/user.repository';
+import { UserService } from 'src/modules/user/service/user.service';
+import { UserLoginDto } from '../infrastructure/dto/systemLogin.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { responseLoginDto } from '../infrastructure/dto/responseLogin.dto';
+@Injectable()
+export class AuthService {
+  constructor(private userRepository: UserRepository, private jwtService: JwtService) {}
+  async systemLogin(data: UserLoginDto): Promise<responseLoginDto> {
+    const result = await this.userRepository.findOne({ username: data.username });
+    if (!result) throw new UnauthorizedException('username is invalid');
+    if (bcrypt.compareSync(data.password, result.password)) {
+      const payload = {
+        sub: result.id,
+        name: result.name,
+        avatar: result.avatar,
+      };
+      return {
+        token: this.jwtService.sign(payload),
+      };
+    }
+    throw new UnauthorizedException('password is invalid');
+  }
+}
