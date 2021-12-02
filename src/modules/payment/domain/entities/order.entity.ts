@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { BankEntity } from 'src/modules/user/domain/entities/bank.entity';
 import { OrderStatusEnum } from '../enums/orderStatus.enum';
@@ -31,6 +31,12 @@ export class OrderEntity extends AppBaseEntity {
     () => BankEntity,
     (account: BankEntity) => account.id)
   bank: BankEntity;
+
+  @ManyToOne(
+    ()=> UserEntity,
+    (user: UserEntity)=> user.id)
+  @JoinColumn()
+  user: UserEntity;
 
   @OneToMany(() => OrderDetailEntity, (orderDetail: OrderDetailEntity) => orderDetail.id)
   orderDetail: OrderDetailEntity[];
