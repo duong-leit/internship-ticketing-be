@@ -38,8 +38,10 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @ManyToOne(() => RoleEntity)
-  @JoinColumn()
+  @ManyToOne(
+    () => RoleEntity,
+    (role: RoleEntity)=>role.id)
+  // @JoinColumn()
   role!: RoleEntity;
 
   @OneToOne(()=> BankEntity)

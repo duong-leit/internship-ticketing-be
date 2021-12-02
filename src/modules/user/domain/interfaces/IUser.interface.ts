@@ -1,3 +1,6 @@
+import { RoleEntity } from '../../../role/domain/entities/role.entity';
+
+
 export interface IUser {
   email?: string;
 
@@ -9,5 +12,5 @@ export interface IUser {
 
   birthday?: string;
 
-  roleId?: string;
+  role?: RoleEntity;
 }
