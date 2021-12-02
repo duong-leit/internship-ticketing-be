@@ -24,9 +24,9 @@ export class UserService {
     const isConflictEmail = await this.userRepository.findOne({ email: userInfo.email });
     if (isConflictEmail) throw new BadRequestException("Email is already used");
 
-    const roleUser = (await this.roleRepository.findOne({ name: "User" }));
-    if (!roleUser) throw new UnauthorizedException("Cant find user id ");
-    console.log(roleUser);
+    const roleUser = (await this.roleRepository.findOne({ name: 'User' }));
+    
+    if (!roleUser) throw new UnauthorizedException('Cant find user id ');
 
     // mapping
     const saltOrRounds = 10;
@@ -38,9 +38,10 @@ export class UserService {
       name: userInfo.name,
       role: roleUser,
     };
+    console.log(newUser);
+    
 
     const user = await this.userRepository.save(newUser);
-
     if (!user) throw new ForbiddenException();
     return {
       email: user.email,
