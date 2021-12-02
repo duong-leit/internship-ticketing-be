@@ -1,5 +1,5 @@
 import { GenderEnum } from '../enums/gender.enum';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { RoleEntity } from 'src/modules/role/domain/entities/role.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
@@ -36,8 +36,7 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @OneToOne(() => RoleEntity)
-  @JoinColumn()
+  @ManyToOne(() => RoleEntity, (role: RoleEntity) => role.id)
   role!: RoleEntity;
 
   @OneToMany(() => EventEntity, (event: EventEntity) => event.id)
