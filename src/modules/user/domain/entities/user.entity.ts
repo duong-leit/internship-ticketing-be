@@ -18,10 +18,10 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   birthday: string | null;
 
-  @Column({ type: 'varchar', length: 11 })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   numberPhone: string | null;
 
   @Column({ type: 'enum', enum: GenderEnum, default: GenderEnum.Other })

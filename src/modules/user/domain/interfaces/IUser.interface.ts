@@ -1,3 +1,13 @@
 export interface IUser {
-  find(params: any): Promise<any>;
+  email?: string;
+
+  name?: string;
+
+  username?: string;
+
+  password?: string;
+
+  birthday?: string;
+
+  roleId?: string;
 }

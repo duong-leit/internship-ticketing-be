@@ -60,11 +60,7 @@ $ npm run test:cov
 ```
 Code Structure
 ```
-<<<<<<< HEAD
-├──enviroments
-=======
 ├──environments
->>>>>>> 2f16a5e349a19ffa18caa4eda72a7887c9c9a43d
 ├──src
     │   app.controller.spec.ts
     │   app.controller.ts
