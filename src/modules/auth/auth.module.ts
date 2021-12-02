@@ -11,6 +11,7 @@ import { RoleModule } from '../role/role.module';
   controllers: [AuthController],
   imports: [
     UserModule,
+    RoleModule,
     JwtModule.register({
       secret: jwtSecretKey,
       signOptions: { expiresIn: '1d' },
