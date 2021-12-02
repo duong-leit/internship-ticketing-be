@@ -8,6 +8,8 @@ export class EventCategoryEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
 
-  @OneToMany(() => EventEntity, (event: EventEntity) => event.id)
+  @OneToMany(
+    () => EventEntity,
+    (event: EventEntity) => event.id)
   event!: EventEntity[];
 }

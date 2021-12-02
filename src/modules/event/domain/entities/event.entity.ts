@@ -1,9 +1,9 @@
-import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
-import { EventCategoryEntity } from './eventCategory.entity';
 import { EventStatusEnum } from '../enums/eventStatus.enum';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
+import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
   @Column({ type: 'text', nullable: false})
@@ -72,8 +72,11 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Ready })
   status: EventStatusEnum;
 
-  @ManyToOne(() => EventCategoryEntity, (category: EventCategoryEntity) => category.id)
-  category: EventCategoryEntity;
+  @ManyToOne(
+    () => EventCategoryEntity,
+    (category: EventCategoryEntity) => category.id)
+  @JoinColumn()
+  category!: EventCategoryEntity;
 
   @ManyToOne(() => UserEntity, (publisher: UserEntity) => publisher.id)
   user: UserEntity;

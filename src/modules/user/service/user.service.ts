@@ -20,17 +20,18 @@ export class UserService {
 
   async createUser(userInfo: CreateUserDto): Promise<UserResponseDto> {
     const isConflictEmail = await this.userRepository.findOne({email: userInfo.email})
-    if(isConflictEmail) throw new BadRequestException('email is already used');
+    if(isConflictEmail) throw new BadRequestException('Email is already used');
 
-    const roleUserId = (await this.roleRepository.findOne({ name: 'User' })).id;
+    const roleUserId = (await this.roleRepository.findOne({ name: 'User' }))?.id;
     if (!roleUserId) throw new UnauthorizedException('Cant find user id ');
 
+    // mapping
     const saltOrRounds = 10;
     const newUser: IUser = {
       email: userInfo.email,
       username: userInfo.email,
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
-      birthday: userInfo.birthday,
+      birthday: '',
       name: userInfo.name,
       roleId: roleUserId,
     };
