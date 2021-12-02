@@ -1,8 +1,9 @@
 import { TicketStatusEnum } from '../enums/ticketStatus.enum';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
-import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
+
+
 @Entity('Ticket')
 export class TicketEntity extends AppBaseEntity {
   @ManyToOne(() => EventEntity, (event: EventEntity) => event.id, { nullable: false })

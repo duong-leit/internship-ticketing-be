@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 import { EventStatusEnum } from '../enums/eventStatus.enum';
@@ -43,7 +43,7 @@ export class EventEntity extends AppBaseEntity {
   availableTickets: number;
 
   @Column({ type: 'text', nullable: false })
-  ticketImageurl: string;
+  ticketImageUrl: string;
 
   @Column({ type: 'decimal', nullable: false })
   ticketPrice: number;
