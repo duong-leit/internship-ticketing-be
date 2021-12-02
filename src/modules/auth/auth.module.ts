@@ -4,6 +4,7 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
 import { jwtSecretKey } from 'src/common/constant';
+import { RoleRepository } from '../role/infrastructure/role.repository';
 import { RoleModule } from '../role/role.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { RoleModule } from '../role/role.module';
       secret: jwtSecretKey,
       signOptions: { expiresIn: '1d' },
     }),
+    RoleModule
   ],
   providers: [AuthService],
 })
