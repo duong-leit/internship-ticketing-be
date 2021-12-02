@@ -4,6 +4,7 @@ import { RoleEntity } from 'src/modules/role/domain/entities/role.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
 import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
+
 @Entity('User')
 export class UserEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
