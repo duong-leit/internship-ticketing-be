@@ -5,6 +5,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import configuration from './configs/configuration';
+import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -27,7 +28,9 @@ import { UserModule } from './modules/user/user.module';
         autoLoadEntities: configService.get('database.autoLoadEntities'),
         synchronize: configService.get('database.sync'),
       }),
-    }), UserModule
+    }),
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
