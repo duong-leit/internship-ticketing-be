@@ -1,4 +1,3 @@
-import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { RolePermissionEntity } from './rolePermission.entity';
 import { UserEntity } from '../../../user/domain/entities/user.entity';
@@ -11,14 +10,10 @@ export class RoleEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   name: string;
 
-  @OneToMany(
-    ()=> UserEntity,
-    (user: UserEntity)=> user.id)
+  @OneToMany(() => UserEntity, (user: UserEntity) => user.id)
   users!: UserEntity[];
 
-  @OneToMany(
-    () => RolePermissionEntity,
-    (permissions: RolePermissionEntity) => permissions.role)
+  @OneToMany(() => RolePermissionEntity, (permissions: RolePermissionEntity) => permissions.role)
   permissions!: RolePermissionEntity[];
 
   @OneToMany(() => UserEntity, (user: UserEntity) => user.role)
