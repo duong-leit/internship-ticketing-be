@@ -1,11 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
-import { IUser } from '../domain/interfaces/IUser.interface';
-import { CreateUserDto, UserResponseDto } from '../dto/user.dto';
-import { UserRepository } from '../infrastructure/user.repository';
-import * as bcrypt from 'bcrypt';
-
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { RoleRepository } from "src/modules/role/infrastructure/role.repository";
+import { IUser } from "../domain/interfaces/IUser.interface";
+import { CreateUserDto, UserResponseDto } from "../dto/user.dto";
+import { UserRepository } from "../infrastructure/user.repository";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
@@ -13,17 +17,14 @@ export class UserService {
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     @InjectRepository(RoleRepository)
-    private readonly roleRepository: RoleRepository,
-  ) {
-  }
-
+    private readonly roleRepository: RoleRepository
+  ) {}
 
   async createUser(userInfo: CreateUserDto): Promise<UserResponseDto> {
-    const isConflictEmail = await this.userRepository.findOne({email: userInfo.email})
-    if(isConflictEmail) throw new BadRequestException('Email is already used');
+    const isConflictEmail = await this.userRepository.findOne({ email: userInfo.email });
+    if (isConflictEmail) throw new BadRequestException("Email is already used");
 
     const roleUser = (await this.roleRepository.findOne({ name: 'User' }));
-    console.log(typeof(roleUser));
     
     if (!roleUser) throw new UnauthorizedException('Cant find user id ');
 
@@ -41,13 +42,11 @@ export class UserService {
     
 
     const user = await this.userRepository.save(newUser);
-    console.log(user);
-    
     if (!user) throw new ForbiddenException();
     return {
       email: user.email,
       name: user.name,
-      birthday: user.birthday
-    }
+      birthday: user.birthday,
+    };
   }
 }
