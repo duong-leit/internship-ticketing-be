@@ -1,4 +1,3 @@
-import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { RolePermissionEntity } from './rolePermission.entity';
 import { UserEntity } from '../../../user/domain/entities/user.entity';
