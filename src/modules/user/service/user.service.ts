@@ -31,7 +31,7 @@ export class UserService {
       email: userInfo.email,
       username: userInfo.email,
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
-      birthday: '',
+      birthday: null,
       name: userInfo.name,
       roleId: roleUserId,
     };

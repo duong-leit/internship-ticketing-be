@@ -1,11 +1,10 @@
 import { GenderEnum } from '../enums/gender.enum';
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { RoleEntity } from 'src/modules/role/domain/entities/role.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { BankEntity } from './bank.entity';
-// import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
-// import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
-
+import { EventEntity } from '../../../event/domain/entities/event.entity';
+import { OrderEntity } from '../../../payment/domain/entities/order.entity';
 
 @Entity('User')
 export class UserEntity extends AppBaseEntity {
@@ -39,7 +38,7 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @OneToOne(() => RoleEntity)
+  @ManyToOne(() => RoleEntity)
   @JoinColumn()
   role!: RoleEntity;
 
@@ -47,9 +46,13 @@ export class UserEntity extends AppBaseEntity {
   @JoinColumn()
   bank: BankEntity;
 
-  // @OneToMany(() => EventEntity, (event: EventEntity) => event.id)
-  // event!: EventEntity[];
+  @OneToMany(
+    () => EventEntity,
+    (event: EventEntity) => event.id)
+  event!: EventEntity[];
 
-  // @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)
-  // order!: OrderEntity[];
+  @OneToMany(
+    () => OrderEntity,
+    (order: OrderEntity) => order.id)
+  order!: OrderEntity[];
 }

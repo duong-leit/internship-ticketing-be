@@ -78,7 +78,9 @@ export class EventEntity extends AppBaseEntity {
   @JoinColumn()
   category!: EventCategoryEntity;
 
-  @ManyToOne(() => UserEntity, (publisher: UserEntity) => publisher.id)
+  @ManyToOne(
+    () => UserEntity,
+    (publisher: UserEntity) => publisher.id)
   user: UserEntity;
 
   @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)
