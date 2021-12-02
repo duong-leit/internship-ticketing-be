@@ -27,7 +27,9 @@ export class OrderEntity extends AppBaseEntity {
   @ManyToOne(() => EventEntity, (event: EventEntity) => event.id)
   event: EventEntity;
 
-  @ManyToOne(() => BankEntity, (account: BankEntity) => account.id)
+  @ManyToOne(
+    () => BankEntity,
+    (account: BankEntity) => account.id)
   bank: BankEntity;
 
   @OneToMany(() => OrderDetailEntity, (orderDetail: OrderDetailEntity) => orderDetail.id)
