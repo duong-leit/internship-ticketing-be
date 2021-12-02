@@ -6,7 +6,6 @@ import { BankEntity } from './bank.entity';
 // import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
 // import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 
-
 @Entity('User')
 export class UserEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
@@ -39,8 +38,7 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @OneToOne(() => RoleEntity)
-  @JoinColumn()
+  @ManyToOne(() => RoleEntity, (role: RoleEntity) => role.id)
   role!: RoleEntity;
 
   @OneToOne(()=> BankEntity)
