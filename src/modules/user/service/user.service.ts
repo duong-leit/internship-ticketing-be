@@ -22,8 +22,10 @@ export class UserService {
     const isConflictEmail = await this.userRepository.findOne({email: userInfo.email})
     if(isConflictEmail) throw new BadRequestException('Email is already used');
 
-    const roleUserId = (await this.roleRepository.findOne({ name: 'User' }))?.id;
-    if (!roleUserId) throw new UnauthorizedException('Cant find user id ');
+    const roleUser = (await this.roleRepository.findOne({ name: 'User' }));
+    console.log(typeof(roleUser));
+    
+    if (!roleUser) throw new UnauthorizedException('Cant find user id ');
 
     // mapping
     const saltOrRounds = 10;
@@ -33,10 +35,14 @@ export class UserService {
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
       birthday: null,
       name: userInfo.name,
-      roleId: roleUserId,
+      role: roleUser,
     };
+    console.log(newUser);
+    
 
     const user = await this.userRepository.save(newUser);
+    console.log(user);
+    
     if (!user) throw new ForbiddenException();
     return {
       email: user.email,
