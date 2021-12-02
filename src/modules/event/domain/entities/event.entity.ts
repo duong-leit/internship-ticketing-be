@@ -6,7 +6,7 @@ import { AppBaseEntity } from 'src/common/entities/entity';
 import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'text', nullable: false})
   name: string;
 
   @Column({ type: 'text', nullable: false })
@@ -45,7 +45,7 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'text', nullable: false })
   ticketImageurl: string;
 
-  @Column({ type: 'float', nullable: false })
+  @Column({ type: 'decimal', nullable: false })
   ticketPrice: number;
 
   @Column({ type: 'int', nullable: false })
