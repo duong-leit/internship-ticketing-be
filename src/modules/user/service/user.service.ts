@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
@@ -6,6 +7,20 @@ import { CreateUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
 
+=======
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { RoleRepository } from "src/modules/role/infrastructure/role.repository";
+import { IUser } from "../domain/interfaces/IUser.interface";
+import { CreateSystemUserDto, UserResponseDto } from "../dto/user.dto";
+import { UserRepository } from "../infrastructure/user.repository";
+import * as bcrypt from "bcrypt";
+>>>>>>> Stashed changes
 
 @Injectable()
 export class UserService {
@@ -18,9 +33,15 @@ export class UserService {
   }
 
 
+<<<<<<< Updated upstream
   async createUser(userInfo: CreateUserDto): Promise<UserResponseDto> {
     const isConflictEmail = await this.userRepository.findOne({email: userInfo.email})
     if(isConflictEmail) throw new BadRequestException('Email is already used');
+=======
+  async createUser(userInfo: CreateSystemUserDto): Promise<UserResponseDto> {
+    const isConflictEmail = await this.userRepository.findOne({ email: userInfo.email });
+    if (isConflictEmail) throw new BadRequestException("Email is already used");
+>>>>>>> Stashed changes
 
     const roleUser = (await this.roleRepository.findOne({ name: 'User' }));
     console.log(typeof(roleUser));
@@ -33,11 +54,9 @@ export class UserService {
       email: userInfo.email,
       username: userInfo.email,
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
-      birthday: null,
       name: userInfo.name,
       role: roleUser,
     };
-    console.log(newUser);
     
 
     const user = await this.userRepository.save(newUser);
@@ -47,7 +66,11 @@ export class UserService {
     return {
       email: user.email,
       name: user.name,
+<<<<<<< Updated upstream
       birthday: user.birthday
     }
+=======
+    };
+>>>>>>> Stashed changes
   }
 }

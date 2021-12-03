@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto, UserResponseDto } from '../dto/user.dto';
+import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
 
 
@@ -18,9 +18,9 @@ export class UserController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: CreateSystemUserDto })
   async createUser(
-    @Body() userInfo: CreateUserDto,
+    @Body() userInfo: CreateSystemUserDto,
   ): Promise<UserResponseDto> {
 
     return this.userServices.createUser(userInfo);

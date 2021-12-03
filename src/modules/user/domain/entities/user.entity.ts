@@ -18,7 +18,7 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   username: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   password: string;
 
   @Column({ type: 'date', nullable: true })
