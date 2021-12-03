@@ -5,7 +5,9 @@
 .env.production
 .env.staging
 
-/yarn.lock
+/remove
+
+/.yarn-lock
 
 # Logs
 logs
