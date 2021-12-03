@@ -38,9 +38,12 @@ export class UserEntity extends AppBaseEntity {
 
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
+  //nullable: true?
+  @Column({type: "uuid", name: 'roleId', nullable: true})
+  roleId: string;
 
   @ManyToOne(() => RoleEntity, (role: RoleEntity) => role.id)
-  @JoinColumn()
+  @JoinColumn({name: 'roleId'})
   role!: RoleEntity;
 
   @OneToOne(()=> BankEntity)

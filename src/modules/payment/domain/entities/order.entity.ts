@@ -21,7 +21,14 @@ export class OrderEntity extends AppBaseEntity {
   @Column({ type: 'date' })
   paymentDate: string | null;
 
+  @Column({type: 'uuid', name: 'buyerId'})
+  buyerId: string;
+
+  @Column({type: 'uuid', name: 'bankId'})
+  bankId: string;
+
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.id)
+  @JoinColumn({name: 'buyerId'})
   buyer: UserEntity;
 
   @ManyToOne(() => EventEntity, (event: EventEntity) => event.id)
@@ -30,13 +37,8 @@ export class OrderEntity extends AppBaseEntity {
   @ManyToOne(
     () => BankEntity,
     (account: BankEntity) => account.id)
+  @JoinColumn({name: 'bankId'})
   bank: BankEntity;
-
-  @ManyToOne(
-    ()=> UserEntity,
-    (user: UserEntity)=> user.id)
-  @JoinColumn()
-  user: UserEntity;
 
   @OneToMany(() => OrderDetailEntity, (orderDetail: OrderDetailEntity) => orderDetail.id)
   orderDetail: OrderDetailEntity[];

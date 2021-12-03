@@ -10,7 +10,10 @@ export class WalletEntity {
   @Column({ type: 'varchar', length: 1024, nullable: false })
   walletAddress!: string;
 
+  @Column({type: 'uuid', name: 'userId'})
+  userId: string;
+
   @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @JoinColumn({name: 'userId'})
   user!: UserEntity;
 }
