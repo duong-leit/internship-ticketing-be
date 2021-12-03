@@ -7,9 +7,10 @@ export class PermissionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   name: string;
 
-  @OneToMany(() => RolePermissionEntity, (rolePermissions: RolePermissionEntity) => rolePermissions.permission)
+  @OneToMany(
+    () => RolePermissionEntity, (rolePermissions: RolePermissionEntity) => rolePermissions.permission)
   rolePermissions!: RolePermissionEntity[];
 }
