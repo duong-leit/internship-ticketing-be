@@ -23,7 +23,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   // config port
-
   const configService = app.select(ConfigModule).get(ConfigService);
   await app.listen(configService.get('port'));
 }
