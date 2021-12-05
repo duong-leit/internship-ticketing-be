@@ -1,16 +1,12 @@
-<<<<<<< Updated upstream
-import { RoleEntity } from "src/modules/role/domain/entities/role.entity";
-=======
 import { RoleEntity } from '../../../role/domain/entities/role.entity';
 import { GenderEnum } from '../enums/gender.enum';
->>>>>>> Stashed changes
 
 export interface IUser {
   email?: string;
 
-  name?: string;
+  name: string;
 
-  username?: string;
+  username: string;
 
   password?: string;
 
@@ -23,4 +19,6 @@ export interface IUser {
   avatar?: string;
 
   role?: RoleEntity;
+
+  isSocial?: boolean;
 }

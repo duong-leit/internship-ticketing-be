@@ -3,12 +3,10 @@ import { ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiTags } from '@nes
 import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
 
-
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userServices: UserService) {
-  }
+  constructor(private userServices: UserService) {}
 
   @Post('/register')
   @ApiCreatedResponse({
@@ -18,11 +16,11 @@ export class UserController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
+
   @ApiBody({ type: CreateSystemUserDto })
   async createUser(
     @Body() userInfo: CreateSystemUserDto,
   ): Promise<UserResponseDto> {
-
-    return this.userServices.createUser(userInfo);
+    return this.userServices.registerUser(userInfo);
   }
 }

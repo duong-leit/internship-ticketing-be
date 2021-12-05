@@ -2,7 +2,6 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { PermissionEntity } from './permission.entity';
 import { RoleEntity } from './role.entity';
 
-
 @Entity('RolePermission')
 export class RolePermissionEntity {
   @PrimaryGeneratedColumn('uuid')
