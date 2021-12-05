@@ -1,1 +1,5 @@
-export const jwtSecretKey = 'theNight-Avici';
+const JWT_SECRET_KEY = 'theNight-Avici';
+const CLIENT_ID = 433723848327383;
+const CLIENT_SECRET = '0f9e1c1f0a4024d4f21a6db103696006';
+
+export { JWT_SECRET_KEY, CLIENT_ID, CLIENT_SECRET };
