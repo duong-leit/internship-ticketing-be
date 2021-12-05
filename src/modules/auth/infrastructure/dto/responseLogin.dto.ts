@@ -5,8 +5,8 @@ export class responseLoginDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  token: string;
+  accessToken: string;
 
   @ApiProperty()
-  status?: number;
+  statusCode?: number;
 }
