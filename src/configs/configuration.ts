@@ -1,7 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { TypeOrmModuleAsyncOptions} from '@nestjs/typeorm';
-
+import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -29,6 +28,6 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
     entities: [join(__dirname, '**', '*.entity.{ts,js}')],
     autoLoadEntities: configService.get('database.autoLoadEntities'),
     synchronize: configService.get('database.sync'),
-  })
+    ssl: configService.get('database.ssl'),
+  }),
 };
-
