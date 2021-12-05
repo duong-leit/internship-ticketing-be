@@ -30,8 +30,8 @@ export class AuthService {
       throw new UnauthorizedException('password is invalid');
     }
     return {
-      status: 200,
-      token: this.generateJWTToken(existUser),
+      statusCode: 200,
+      accessToken: this.generateJWTToken(existUser),
     };
   }
 
@@ -62,8 +62,8 @@ export class AuthService {
       });
     }
     return {
-      status: 200,
-      token: this.generateJWTToken(existUser),
+      statusCode: 200,
+      accessToken: this.generateJWTToken(existUser),
     };
   }
 
