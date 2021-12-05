@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { GenderEnum } from '../domain/enums/gender.enum';
 
 
-export class CreateUserDto {
+export class CreateSystemUserDto {
   @IsEmail()
   @IsNotEmpty()
   @Length(1, 255)
@@ -29,11 +30,19 @@ export class UserResponseDto {
   @IsOptional()
   name?: string;
 
-  @IsNotEmpty()
   @ApiProperty()
   @IsOptional()
-  username?: string;
+  birthday?: string;
 
   @ApiProperty()
-  birthday?: string;
+  @IsOptional()
+  gender?: GenderEnum;
+
+  @ApiProperty()
+  @IsOptional()
+  phoneNumber?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  avatar?: string;
 }

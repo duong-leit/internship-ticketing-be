@@ -15,8 +15,11 @@ export class BankEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 20, nullable: false })
   creditNumber!: string;
 
+  @Column({type: 'uuid', name:'userId'})
+  userId: string;
+
   @OneToOne(() => UserEntity)
-  @JoinColumn()
+  @JoinColumn({name: 'userId'})
   user!: UserEntity;
 
   @OneToMany(

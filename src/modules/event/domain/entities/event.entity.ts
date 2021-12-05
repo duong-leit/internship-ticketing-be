@@ -72,15 +72,22 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Ready })
   status: EventStatusEnum;
 
+  @Column({type: 'uuid', name: 'categoryId'})
+  categoryId: string;
+
+  @Column({type: 'uuid', name: 'userId'})
+  userId: string;
+
   @ManyToOne(
     () => EventCategoryEntity,
     (category: EventCategoryEntity) => category.id)
-  @JoinColumn()
+  @JoinColumn({name: 'categoryId'})
   category!: EventCategoryEntity;
 
   @ManyToOne(
     () => UserEntity,
     (publisher: UserEntity) => publisher.id)
+  @JoinColumn({name: 'userId'})
   user: UserEntity;
 
   @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)

@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import { CreateUserDto, UserResponseDto } from '../dto/user.dto';
+import { CreateSystemUserDto, UserResponseDto } from "../dto/user.dto";
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../domain/entities/user.entity';
@@ -20,14 +20,13 @@ export class UserService {
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository
   ) {}
-
-  async registerUser(userInfo: CreateUserDto): Promise<UserResponseDto> {
+  
+  async registerUser(userInfo: CreateSystemUserDto): Promise<UserResponseDto> {
     const saltOrRounds = 10;
     const userInformation = {
       name: userInfo.name,
       username: userInfo.email,
       email: userInfo.email,
-      birthday: null,
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
     };
     const newUser = await this.createUser(userInformation);
@@ -35,7 +34,6 @@ export class UserService {
     return {
       email: newUser.email,
       name: newUser.name,
-      birthday: newUser.birthday,
     };
   }
 
@@ -45,8 +43,11 @@ export class UserService {
     });
     if (isConflictEmail) throw new BadRequestException('Email is already used');
 
+  async createUser(userInfo: CreateSystemUserDto): Promise<UserResponseDto> {
+    const isConflictEmail = await this.userRepository.findOne({ email: userInfo.email });
+    if (isConflictEmail) throw new BadRequestException("Email is already used");
+    
     const roleUser = await this.roleRepository.findOne({ name: 'User' });
-
     if (!roleUser) throw new InternalServerErrorException('Cant find user id ');
 
     // mapping
@@ -54,10 +55,10 @@ export class UserService {
       ...userInfo,
       role: roleUser,
     };
-    console.log(newUser);
 
     const user = await this.userRepository.save(newUser);
     if (!user) throw new ForbiddenException();
+
     return user;
   }
 }
