@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserRepository } from 'src/modules/user/infrastructure/user.repository';
 import { UserLoginDto } from '../infrastructure/dto/systemLogin.dto';
 import * as bcrypt from 'bcrypt';
@@ -13,29 +8,36 @@ import { FacebookLoginDto } from '../infrastructure/dto/facebookLoginDto';
 import { FacebookAuthService } from 'facebook-auth-nestjs';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IFacebookData } from '../infrastructure/interface/facebook.interface';
+import { UserService } from 'src/modules/user/service/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userRepository: UserRepository,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
     private readonly fbService: FacebookAuthService,
+    private readonly userService: UserService,
     private roleRepository: RoleRepository
   ) {}
 
   async systemLogin(data: UserLoginDto): Promise<responseLoginDto> {
-    const isExistUser = await this.userRepository.findOne({
+    const existUser = await this.userRepository.findOne({
       relations: ['role'],
       where: { username: data.username, isSocial: false },
     });
-    if (!isExistUser) throw new UnauthorizedException('username is invalid');
-    if (!bcrypt.compareSync(data.password, isExistUser.password)) {
+    if (!existUser) throw new UnauthorizedException('username is invalid');
+    if (!bcrypt.compareSync(data.password, existUser.password)) {
       throw new UnauthorizedException('password is invalid');
     }
-    return this.generateJWTToken(isExistUser);
+    return {
+      status: 200,
+      token: this.generateJWTToken(existUser),
+    };
   }
 
-  async facebookLogin({ accessToken }: FacebookLoginDto): Promise<responseLoginDto> {
+  async facebookLogin({
+    accessToken,
+  }: FacebookLoginDto): Promise<responseLoginDto> {
     const userInformation: IFacebookData = await this.fbService.getUser(
       accessToken,
       'id',
@@ -51,36 +53,27 @@ export class AuthService {
     });
 
     if (!existUser) {
-      existUser = await this.userRepository.findOne({
-        where: { email: userInformation.email },
-      });
-
-      if (existUser) {
-        throw new ForbiddenException('Email is already used');
-      }
-      const roleUser = await this.roleRepository.findOne({ name: 'User' });
-      if (!roleUser) throw new InternalServerErrorException();
-
-      existUser = await this.userRepository.save({
-        name: userInformation.name,
-        username: userInformation.id,
+      existUser = await this.userService.createUser({
         email: userInformation.email || null,
+        username: userInformation.id,
         birthday: userInformation.birthday || null,
+        name: userInformation.name,
         isSocial: true,
-        password: '',
-        role: roleUser || null,
       });
     }
-    return this.generateJWTToken(existUser);
+    return {
+      status: 200,
+      token: this.generateJWTToken(existUser),
+    };
   }
 
-  generateJWTToken(data: any): responseLoginDto {
+  generateJWTToken(data: any): string {
     const payload = {
       sub: data.id,
       name: data.name,
       avatar: data.avatar,
       role: data.role.name,
     };
-    return { token: this.jwtService.sign(payload) };
+    return this.jwtService.sign(payload);
   }
 }

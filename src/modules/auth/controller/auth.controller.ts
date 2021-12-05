@@ -18,7 +18,10 @@ export class AuthController {
 
   @Post('system-login')
   @ApiOkResponse({ type: responseLoginDto })
-  @ApiUnauthorizedResponse({ status: 401, description: 'username/password is invalid' })
+  @ApiUnauthorizedResponse({
+    status: 401,
+    description: 'username/password is invalid',
+  })
   @ApiBody({ type: UserLoginDto })
   login(@Body() user: UserLoginDto): Promise<responseLoginDto> {
     return this.authService.systemLogin(user);
@@ -27,7 +30,10 @@ export class AuthController {
   @Post('fb-login')
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({ status: 401, description: 'user is invalid' })
-  @ApiForbiddenResponse({ status: 403, description: 'Email is already used for another account' })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: 'Email is already used for another account',
+  })
   @ApiBody({ type: FacebookLoginDto })
   facebookLogin(@Body() user: FacebookLoginDto): Promise<responseLoginDto> {
     return this.authService.facebookLogin(user);

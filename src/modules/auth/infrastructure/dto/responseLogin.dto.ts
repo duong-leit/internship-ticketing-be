@@ -6,4 +6,7 @@ export class responseLoginDto {
   @IsNotEmpty()
   @IsString()
   token: string;
+
+  @ApiProperty()
+  status?: number;
 }
