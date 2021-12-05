@@ -24,7 +24,7 @@ async function bootstrap() {
 
   // config port
   const configService = app.select(ConfigModule).get(ConfigService);
-  await app.listen(configService.get('port'));
+  await app.listen(configService.get('port')|| 3000);
 }
 bootstrap().then(() => {
   console.log('Started');
