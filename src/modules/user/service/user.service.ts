@@ -43,10 +43,6 @@ export class UserService {
     });
     if (isConflictEmail) throw new BadRequestException('Email is already used');
 
-  async createUser(userInfo: CreateSystemUserDto): Promise<UserResponseDto> {
-    const isConflictEmail = await this.userRepository.findOne({ email: userInfo.email });
-    if (isConflictEmail) throw new BadRequestException("Email is already used");
-    
     const roleUser = await this.roleRepository.findOne({ name: 'User' });
     if (!roleUser) throw new InternalServerErrorException('Cant find user id ');
 
