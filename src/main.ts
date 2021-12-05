@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+// import { ConfigModule, ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,8 +23,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   // config port
-  const configService = app.select(ConfigModule).get(ConfigService);
-  await app.listen(configService.get('port')|| 3000);
+  // const configService = app.select(ConfigModule).get(ConfigService);
+  await app.listen(3000);
 }
 bootstrap().then(() => {
   console.log('Started');
