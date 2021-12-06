@@ -1,7 +1,5 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
-import { TypeOrmModuleAsyncOptions} from '@nestjs/typeorm';
-
+import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -13,6 +11,7 @@ export default () => ({
     password: `${process.env.DATABASE_PASSWORD}`,
     sync: process.env.DATABASE_SYNCHRONIZE === 'true',
     autoLoadEntities: process.env.DATABASE_AUTOLOADENTITIES === 'true',
+    ssl: process.env.DATABASE_SSL === 'true',
   },
 });
 
@@ -26,9 +25,15 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
     username: configService.get('database.user'),
     password: configService.get('database.password'),
     database: configService.get('database.name'),
-    entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+    entities: [__dirname + '/../**/*.entity.{js,ts}'],
     autoLoadEntities: configService.get('database.autoLoadEntities'),
     synchronize: configService.get('database.sync'),
-  })
+    ssl: configService.get('database.ssl'),
+    extra:
+      configService.get('database.ssl') === true
+        ? {
+            ssl: { rejectUnauthorized: false },
+          }
+        : {},
+  }),
 };
-
