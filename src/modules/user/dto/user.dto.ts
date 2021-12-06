@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 import { GenderEnum } from '../domain/enums/gender.enum';
-
 
 export class CreateSystemUserDto {
   @IsEmail()
@@ -23,6 +28,9 @@ export class CreateSystemUserDto {
 }
 
 export class UserResponseDto {
+  @ApiProperty()
+  statusCode?: number;
+
   @ApiProperty()
   email?: string;
 
