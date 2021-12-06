@@ -1,5 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
 
@@ -16,11 +21,10 @@ export class UserController {
   @ApiForbiddenResponse({
     description: 'Forbidden.',
   })
-
   @ApiBody({ type: CreateSystemUserDto })
   async createUser(
-    @Body() userInfo: CreateSystemUserDto,
+    @Body() userInfo: CreateSystemUserDto
   ): Promise<UserResponseDto> {
-    return this.userServices.registerUser(userInfo);
+    return this.userServices.getNewSystemUserInfo(userInfo);
   }
 }

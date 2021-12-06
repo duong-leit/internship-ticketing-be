@@ -6,18 +6,16 @@ import { JwtService } from '@nestjs/jwt';
 import { responseLoginDto } from '../infrastructure/dto/responseLogin.dto';
 import { FacebookLoginDto } from '../infrastructure/dto/facebookLoginDto';
 import { FacebookAuthService } from 'facebook-auth-nestjs';
-import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IFacebookData } from '../infrastructure/interface/facebook.interface';
 import { UserService } from 'src/modules/user/service/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userRepository: UserRepository,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly fbService: FacebookAuthService,
-    private readonly userService: UserService,
-    private roleRepository: RoleRepository
+    private readonly userService: UserService
   ) {}
 
   async systemLogin(data: UserLoginDto): Promise<responseLoginDto> {
@@ -25,9 +23,9 @@ export class AuthService {
       relations: ['role'],
       where: { username: data.username, isSocial: false },
     });
-    if (!existUser) throw new UnauthorizedException('username is invalid');
+    if (!existUser) throw new UnauthorizedException('Username is invalid');
     if (!bcrypt.compareSync(data.password, existUser.password)) {
-      throw new UnauthorizedException('password is invalid');
+      throw new UnauthorizedException('Password is invalid');
     }
     return {
       statusCode: 200,
@@ -46,7 +44,7 @@ export class AuthService {
       'birthday'
     );
 
-    if (!userInformation) throw new UnauthorizedException('user is invalid');
+    if (!userInformation) throw new UnauthorizedException('User is invalid');
     let existUser = await this.userRepository.findOne({
       relations: ['role'],
       where: { username: userInformation.id, isSocial: true },
@@ -67,7 +65,7 @@ export class AuthService {
     };
   }
 
-  generateJWTToken(data: any): string {
+  private generateJWTToken(data: any): string {
     const payload = {
       sub: data.id,
       name: data.name,

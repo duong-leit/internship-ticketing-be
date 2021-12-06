@@ -21,7 +21,9 @@ export class UserService {
     private readonly roleRepository: RoleRepository
   ) {}
 
-  async registerUser(userInfo: CreateSystemUserDto): Promise<UserResponseDto> {
+  async getNewSystemUserInfo(
+    userInfo: CreateSystemUserDto
+  ): Promise<UserResponseDto> {
     const saltOrRounds = 10;
     const userInformation = {
       name: userInfo.name,
@@ -29,11 +31,10 @@ export class UserService {
       email: userInfo.email,
       password: await bcrypt.hash(userInfo.password, saltOrRounds),
     };
-    const newUser = await this.createUser(userInformation);
+    await this.createUser(userInformation);
 
     return {
-      email: newUser.email,
-      name: newUser.name,
+      statusCode: 200,
     };
   }
 
