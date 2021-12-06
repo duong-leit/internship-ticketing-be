@@ -21,7 +21,7 @@ export class RoleService {
     private readonly rolePermissionRepository: RolePermissionRepository
   ) {}
 
-  async compareRolePermission(
+  private async compareRolePermission(
     newRPArray: RolePermissionRequestDto[],
     oldRPArray: IRolePermissionInterface[]
   ) {

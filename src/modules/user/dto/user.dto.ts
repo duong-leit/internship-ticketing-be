@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsNotEmpty,
+  IsNotEmpty, IsNumber,
   IsOptional,
   IsString,
   Length,
@@ -25,6 +25,33 @@ export class CreateSystemUserDto {
   @Length(1)
   @ApiProperty()
   password: string;
+}
+
+export class CreateFacebookUserDto {
+  @Length(1)
+  @IsString()
+  username: string
+
+  @Length(1, 255)
+  @IsString()
+  email: string;
+
+  @Length(1)
+  @IsString()
+  name: string;
+
+  @Length(1)
+  @ApiProperty()
+  @IsOptional()
+  birthday?: string;
+}
+
+export class CreateUserResponseDto{
+  @IsNumber()
+  statusCode: number;
+
+  @IsString()
+  message: string;
 }
 
 export class UserResponseDto {

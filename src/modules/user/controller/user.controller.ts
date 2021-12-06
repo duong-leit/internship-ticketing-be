@@ -22,9 +22,9 @@ export class UserController {
     description: 'Forbidden.',
   })
   @ApiBody({ type: CreateSystemUserDto })
-  async createUser(
+  createUser(
     @Body() userInfo: CreateSystemUserDto
   ): Promise<UserResponseDto> {
-    return this.userServices.getNewSystemUserInfo(userInfo);
+    return this.userServices.createSystemUser(userInfo);
   }
 }

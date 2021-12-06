@@ -6,10 +6,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { FacebookLoginDto } from '../infrastructure/dto/facebookLoginDto';
-import { responseLoginDto } from '../infrastructure/dto/responseLogin.dto';
-import { UserLoginDto } from '../infrastructure/dto/systemLogin.dto';
 import { AuthService } from '../service/auth.service';
+import { FacebookLoginDto, responseLoginDto, UserLoginDto } from '../infrastructure/dto/login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -35,7 +33,7 @@ export class AuthController {
     description: 'Email is already used for another account',
   })
   @ApiBody({ type: FacebookLoginDto })
-  facebookLogin(@Body() user: FacebookLoginDto): Promise<responseLoginDto> {
-    return this.authService.facebookLogin(user);
+  async facebookLogin(@Body() user: FacebookLoginDto): Promise<responseLoginDto> {
+    return await this.authService.facebookLogin(user);
   }
 }

@@ -4,9 +4,9 @@ import { GenderEnum } from '../enums/gender.enum';
 export interface IUser {
   email?: string;
 
-  name: string;
+  name?: string;
 
-  username: string;
+  username?: string;
 
   password?: string;
 
@@ -17,6 +17,8 @@ export interface IUser {
   phoneNumber?: string;
 
   avatar?: string;
+
+  roleId?: string;
 
   role?: RoleEntity;
 

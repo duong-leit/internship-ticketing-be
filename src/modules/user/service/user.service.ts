@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
+import { CreateFacebookUserDto, CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../domain/entities/user.entity';
@@ -20,6 +20,57 @@ export class UserService {
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository
   ) {}
+
+  private async saveUserToDatabase(newUser: IUser){
+    // check empty email
+    if(!newUser.email){
+      throw new BadRequestException('Email is required');
+    }
+    // find User
+    const user = await this.findOneUser({email: newUser.email})
+    console.log(user, 'user');
+    if(user){
+      throw new BadRequestException('Email is already used');
+    }
+    // Get ID role
+    newUser.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
+
+    const result = await this.userRepository.save(newUser);
+    return {
+      statusCode: result ? 201 : 500,
+      message: result ? 'Account have been created' : 'Server Error'
+    }
+  }
+
+  async findOneUser(data:{[key:string]: string|number}){
+    return this.userRepository.findOne(data)
+  }
+
+  async createSystemUser(
+    userInfo: CreateSystemUserDto
+  ){
+    const saltOrRounds = 10;
+    const userInformation: IUser= {
+      name: userInfo.name,
+      username: userInfo.email,
+      email: userInfo.email,
+      isSocial: false,
+      password: await bcrypt.hash(userInfo.password, saltOrRounds),
+    };
+    return this.saveUserToDatabase(userInformation);
+  }
+
+  async createFacebookUser(
+    userInfo: CreateFacebookUserDto
+  ){
+    const userInformation: IUser = {
+      name: userInfo.name,
+      username: userInfo.email,
+      email: userInfo.email,
+      isSocial: true,
+    };
+    return this.saveUserToDatabase(userInformation);
+  }
 
   async getNewSystemUserInfo(
     userInfo: CreateSystemUserDto
