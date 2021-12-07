@@ -1,5 +1,9 @@
-const JWT_SECRET_KEY = 'theNight-Avici';
-const CLIENT_ID = 1265774213936701;
-const CLIENT_SECRET = '59ff446af6ce81e44701252b314edfe3';
 
-export { JWT_SECRET_KEY, CLIENT_ID, CLIENT_SECRET };
+const SALT_OR_ROUNDS = 10;
+const ACTION_RECAPTCHA = ['login', 'register'];
+const SCORE_RECAPTCHA = 0.8;
+export {
+  SALT_OR_ROUNDS,
+  ACTION_RECAPTCHA,
+  SCORE_RECAPTCHA,
+};

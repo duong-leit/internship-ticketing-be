@@ -1,13 +1,19 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from 'src/modules/user/infrastructure/user.repository';
-import { UserLoginDto } from '../infrastructure/dto/systemLogin.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { responseLoginDto } from '../infrastructure/dto/responseLogin.dto';
-import { FacebookLoginDto } from '../infrastructure/dto/facebookLoginDto';
 import { FacebookAuthService } from 'facebook-auth-nestjs';
-import { IFacebookData } from '../infrastructure/interface/facebook.interface';
+import { IFacebookData } from 'src/common/interface/common.interface';
 import { UserService } from 'src/modules/user/service/user.service';
+import {
+  FacebookLoginDto,
+  responseLoginDto,
+  UserLoginDto,
+} from '../infrastructure/dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,21 +25,23 @@ export class AuthService {
   ) {}
 
   async systemLogin(data: UserLoginDto): Promise<responseLoginDto> {
-    const existUser = await this.userRepository.findOne({
-      relations: ['role'],
-      where: { username: data.username, isSocial: false },
-    });
+    const existUser = await this.userService.getByUsername(data.username);
     if (!existUser) throw new UnauthorizedException('Username is invalid');
     if (!bcrypt.compareSync(data.password, existUser.password)) {
       throw new UnauthorizedException('Password is invalid');
     }
     return {
       statusCode: 200,
+      data: {
+        name: existUser.name,
+        avatar: existUser.avatar,
+      },
       accessToken: this.generateJWTToken(existUser),
     };
   }
 
   async facebookLogin({
+    avatarUrl,
     accessToken,
   }: FacebookLoginDto): Promise<responseLoginDto> {
     const userInformation: IFacebookData = await this.fbService.getUser(
@@ -43,34 +51,37 @@ export class AuthService {
       'email',
       'birthday'
     );
-
-    if (!userInformation) throw new UnauthorizedException('User is invalid');
-    let existUser = await this.userRepository.findOne({
-      relations: ['role'],
-      where: { username: userInformation.id, isSocial: true },
-    });
-
-    if (!existUser) {
-      existUser = await this.userService.createUser({
-        email: userInformation.email || null,
-        username: userInformation.id,
-        birthday: userInformation.birthday || null,
-        name: userInformation.name,
-        isSocial: true,
-      });
+    if (!userInformation) {
+      throw new BadRequestException('The token have been expired');
     }
+
+    const user = await this.userService.getByUsername(userInformation.id);
+    if (!user) {
+      return {
+        statusCode: 401,
+        data: {
+          name: userInformation.name,
+          email: userInformation.email ? userInformation.email : null,
+        },
+        accessToken: accessToken,
+      };
+    }
+
     return {
       statusCode: 200,
-      accessToken: this.generateJWTToken(existUser),
+      data: {
+        name: user.name,
+        avatar: avatarUrl,
+      },
+      accessToken: this.generateJWTToken(user),
     };
   }
 
   private generateJWTToken(data: any): string {
     const payload = {
-      sub: data.id,
-      name: data.name,
-      avatar: data.avatar,
-      role: data.role.name,
+      sub: data.id || null,
+      email: data.email || null,
+      role: data.role?.name || null,
     };
     return this.jwtService.sign(payload);
   }

@@ -3,23 +3,20 @@ import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './controller/auth.controller';
 import { AuthService } from './service/auth.service';
-import { JWT_SECRET_KEY, CLIENT_ID, CLIENT_SECRET } from 'src/common/constant';
 import { RoleModule } from '../role/role.module';
 import { FacebookAuthModule } from 'facebook-auth-nestjs';
+import {
+  facebookAuthModuleOption,
+  jwtModuleOption,
+} from 'src/configs/configuration';
 
 @Module({
   controllers: [AuthController],
   imports: [
-    FacebookAuthModule.forRoot({
-      clientId: CLIENT_ID,
-      clientSecret: CLIENT_SECRET,
-    }),
+    FacebookAuthModule.forRootAsync(facebookAuthModuleOption),
     UserModule,
     RoleModule,
-    JwtModule.register({
-      secret: JWT_SECRET_KEY,
-      signOptions: { expiresIn: '1d' },
-    }),
+    JwtModule.registerAsync(jwtModuleOption),
     RoleModule,
   ],
   providers: [AuthService],

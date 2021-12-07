@@ -1,5 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import { ACTION_RECAPTCHA, SCORE_RECAPTCHA } from 'src/common/constant';
+
 
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -13,6 +15,10 @@ export default () => ({
     autoLoadEntities: process.env.DATABASE_AUTOLOADENTITIES === 'true',
     ssl: process.env.DATABASE_SSL === 'true',
   },
+  jwtSecretKey: process.env.JWT_SECRET_KEY,
+  recaptchaSecretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
+  facebookClientId: process.env.CLIENT_ID,
+  facebookClientSecret: process.env.CLIENT_SECRET,
 });
 
 export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
@@ -36,4 +42,37 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
           }
         : {},
   }),
+};
+
+export const googleRecatpChaModuleOption = {
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    secretKey: configService.get('recaptchaSecretKey'),
+    response: (req) => (req.headers.recaptcha || '').toString(),
+    // skipIf: process.env.NODE_ENV !== 'production',
+    actions: ACTION_RECAPTCHA,
+    score: SCORE_RECAPTCHA,
+  }),
+  inject: [ConfigService],
+};
+
+export const facebookAuthModuleOption = {
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    clientId: configService.get('facebookClientId'), //CLIENT_ID,
+    clientSecret: configService.get('facebookClientSecret'), //CLIENT_SECRET,
+  }),
+  inject: [ConfigService],
+};
+
+export const jwtModuleOption = {
+  imports: [ConfigModule],
+  useFactory: async (configService: ConfigService) => {
+    console.log(configService);
+    return {
+      secret: configService.get<string>('jwtSecretKey'),
+      signOptions: { expiresIn: '7d' },
+    };
+  },
+  inject: [ConfigService],
 };
