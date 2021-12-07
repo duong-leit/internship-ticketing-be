@@ -1,11 +1,15 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
+import {
+  CreateFacebookUserDto,
+  CreateSystemUserDto,
+  UserResponseDto,
+} from '../dto/user.dto';
 import { UserService } from '../service/user.service';
 
 @ApiTags('User')
@@ -18,13 +22,28 @@ export class UserController {
     description: 'The record has been successfully created.',
     type: UserResponseDto,
   })
-  @ApiForbiddenResponse({
-    description: 'Forbidden.',
+  @ApiBadRequestResponse({
+    description: 'Email is already used',
   })
   @ApiBody({ type: CreateSystemUserDto })
-  createUser(
+  registerUser(
     @Body() userInfo: CreateSystemUserDto
   ): Promise<UserResponseDto> {
     return this.userServices.createSystemUser(userInfo);
+  }
+
+  @Post('/facebookRegister')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: UserResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Email is already used',
+  })
+  @ApiBody({ type: CreateFacebookUserDto })
+  registerFacebookUser(
+    @Body() userInfo: CreateFacebookUserDto
+  ): Promise<UserResponseDto> {
+    return this.userServices.createFacebookUser(userInfo);
   }
 }

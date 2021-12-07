@@ -25,9 +25,10 @@ export class FacebookLoginDto {
   avatarUrl: string;
 }
 
-export class userInfo{
+export class userInfo {
   name?: string;
-  avatar?: string
+  avatar?: string;
+  email?: string;
 }
 
 export class responseLoginDto {
@@ -42,7 +43,7 @@ export class responseLoginDto {
 
   @ApiProperty()
   @IsOptional()
-  data?: userInfo
+  data?: userInfo;
 
   @ApiProperty()
   @IsString()

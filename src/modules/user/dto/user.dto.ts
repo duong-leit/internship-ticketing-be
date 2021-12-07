@@ -1,12 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
-  IsNotEmpty, IsNumber,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
 import { GenderEnum } from '../domain/enums/gender.enum';
+
+class FacebookDataDto {
+  @Length(1)
+  @ApiProperty()
+  @IsString()
+  username: string;
+
+  @Length(1, 255)
+  @ApiProperty()
+  @IsString()
+  email: string;
+
+  @Length(1)
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @Length(1)
+  @ApiProperty()
+  @IsOptional()
+  birthday?: string;
+
+  @ApiProperty()
+  @IsString()
+  avatarUrl?: string;
+}
 
 export class CreateSystemUserDto {
   @IsEmail()
@@ -28,25 +56,16 @@ export class CreateSystemUserDto {
 }
 
 export class CreateFacebookUserDto {
-  @Length(1)
-  @IsString()
-  username: string
-
-  @Length(1, 255)
-  @IsString()
-  email: string;
-
-  @Length(1)
-  @IsString()
-  name: string;
-
-  @Length(1)
+  @IsNotEmpty()
+  @IsObject({ each: true })
   @ApiProperty()
-  @IsOptional()
-  birthday?: string;
+  data: FacebookDataDto;
+
+  @ApiProperty()
+  accessToken: string;
 }
 
-export class CreateUserResponseDto{
+export class CreateUserResponseDto {
   @IsNumber()
   statusCode: number;
 
