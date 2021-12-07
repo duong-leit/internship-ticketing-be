@@ -1,7 +1,7 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { TypeOrmModuleAsyncOptions} from '@nestjs/typeorm';
-
+import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import { ACTION_RECAPTCHA, SCORE_RECAPTCHA } from 'src/common/constant';
 
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
@@ -14,6 +14,7 @@ export default () => ({
     sync: process.env.DATABASE_SYNCHRONIZE === 'true',
     autoLoadEntities: process.env.DATABASE_AUTOLOADENTITIES === 'true',
   },
+  recaptchaSecretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
 });
 
 export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
@@ -29,6 +30,20 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
     entities: [join(__dirname, '**', '*.entity.{ts,js}')],
     autoLoadEntities: configService.get('database.autoLoadEntities'),
     synchronize: configService.get('database.sync'),
-  })
+  }),
 };
 
+export const googleRecatpChaModule = {
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => {
+    console.log(configService);
+    return {
+      secretKey: configService.get('recaptchaSecretKey'),
+      response: (req) => (req.headers.recaptcha || '').toString(),
+      // skipIf: process.env.NODE_ENV !== 'production',
+      actions: ACTION_RECAPTCHA,
+      score: SCORE_RECAPTCHA,
+    };
+  },
+  inject: [ConfigService],
+};
