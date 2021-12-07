@@ -9,6 +9,7 @@ import {
   facebookAuthModuleOption,
   jwtModuleOption,
 } from 'src/configs/configuration';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   controllers: [AuthController],
@@ -19,6 +20,6 @@ import {
     JwtModule.registerAsync(jwtModuleOption),
     RoleModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
