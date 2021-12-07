@@ -1,13 +1,8 @@
-// const JWT_SECRET_KEY = 'theNight-Avici';
-// const CLIENT_ID = 433723848327383;
-// const CLIENT_SECRET = '0f9e1c1f0a4024d4f21a6db103696006';
+
 const SALT_OR_ROUNDS = 10;
 const ACTION_RECAPTCHA = ['login', 'register'];
 const SCORE_RECAPTCHA = 0.8;
 export {
-  // JWT_SECRET_KEY,
-  // CLIENT_ID,
-  // CLIENT_SECRET,
   SALT_OR_ROUNDS,
   ACTION_RECAPTCHA,
   SCORE_RECAPTCHA,
