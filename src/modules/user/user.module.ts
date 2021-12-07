@@ -7,14 +7,11 @@ import { RoleModule } from '../role/role.module';
 import { BankRepository } from './infrastructure/bank.repository';
 import { WalletRepository } from './infrastructure/wallet.repository';
 import { FacebookAuthModule } from 'facebook-auth-nestjs';
-import { CLIENT_ID, CLIENT_SECRET } from 'src/common/constant';
+import { facebookAuthModuleOption } from 'src/configs/configuration';
 
 @Module({
   imports: [
-    FacebookAuthModule.forRoot({
-      clientId: CLIENT_ID,
-      clientSecret: CLIENT_SECRET,
-    }),
+    FacebookAuthModule.forRootAsync(facebookAuthModuleOption),
     TypeOrmModule.forFeature([
       UserRepository,
       BankRepository,

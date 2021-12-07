@@ -56,7 +56,6 @@ export class AuthService {
     }
 
     const user = await this.userService.getByUsername(userInformation.id);
-    console.log(user);
     if (!user) {
       return {
         statusCode: 401,

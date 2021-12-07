@@ -20,7 +20,7 @@ import { Recaptcha } from '@nestlab/google-recaptcha';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Recaptcha()
+  @Recaptcha({ action: 'login' })
   @Post('system-login')
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({
@@ -29,7 +29,7 @@ export class AuthController {
   })
   @ApiHeader({
     name: 'recaptcha',
-    description: 'Custom header',
+    description: 'google recaptcha',
   })
   @ApiBody({ type: UserLoginDto })
   login(@Body() user: UserLoginDto): Promise<responseLoginDto> {

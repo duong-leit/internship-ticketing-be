@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import configuration, {
-  googleRecatpChaModule,
+  googleRecatpChaModuleOption,
   typeormModuleOption,
 } from './configs/configuration';
 
@@ -22,7 +22,7 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
       load: [configuration],
     }),
     TypeOrmModule.forRootAsync(typeormModuleOption),
-    GoogleRecaptchaModule.forRootAsync(googleRecatpChaModule),
+    GoogleRecaptchaModule.forRootAsync(googleRecatpChaModuleOption),
     UserModule,
     TicketModule,
     RoleModule,

@@ -3,8 +3,10 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
+  ApiHeader,
   ApiTags,
 } from '@nestjs/swagger';
+import { Recaptcha } from '@nestlab/google-recaptcha';
 import {
   CreateFacebookUserDto,
   CreateSystemUserDto,
@@ -17,6 +19,7 @@ import { UserService } from '../service/user.service';
 export class UserController {
   constructor(private userServices: UserService) {}
 
+  @Recaptcha({ action: 'register' })
   @Post('/register')
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
@@ -24,6 +27,10 @@ export class UserController {
   })
   @ApiBadRequestResponse({
     description: 'Email is already used',
+  })
+  @ApiHeader({
+    name: 'recaptcha',
+    description: 'google recaptcha',
   })
   @ApiBody({ type: CreateSystemUserDto })
   registerUser(
