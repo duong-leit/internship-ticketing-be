@@ -14,6 +14,8 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { EventModule } from './modules/event/event.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
+import { APP_GUARD } from '@nestjs/core';
+import { RoleGuard } from './modules/auth/guards/role.guard';
 
 @Module({
   imports: [
@@ -29,6 +31,12 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
     PaymentModule,
     EventModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
   ],
 })
 export class AppModule {}
