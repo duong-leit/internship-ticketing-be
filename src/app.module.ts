@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
 import { APP_GUARD } from '@nestjs/core';
 import { RoleGuard } from './modules/auth/guards/role.guard';
+import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { RoleGuard } from './modules/auth/guards/role.guard';
     AuthModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: RoleGuard,

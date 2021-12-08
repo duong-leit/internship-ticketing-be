@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -11,16 +11,12 @@ import {
   RolePermissionRequestDto,
   RoleRequestDto,
 } from '../dto/role.dto';
-import { Public, Roles } from 'src/modules/auth/roles.decorator';
-import { RoleEnum } from '../domain/enums/role.enum';
 
 @ApiTags('Role and Permission')
 @Controller('')
 export class RoleController {
   constructor(private roleService: RoleService) {}
 
-  // @Public()
-  @Roles(RoleEnum.Admin)
   @Get()
   getAllRolePermission() {
     return this.roleService.getAllRolePermission();

@@ -7,24 +7,21 @@ import { IS_PUBLIC_KEY, ROLES_KEY } from '../roles.decorator';
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   canActivate(context: ExecutionContext): boolean {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+    const isPublic = this.reflector.getAllAndOverride<any>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    const requiredRoles = this.reflector.getAllAndOverride<RoleEnum>(
+    if (isPublic) return true;
+
+    const requiredRoles = this.reflector.getAllAndOverride<RoleEnum[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()]
     );
-    if (isPublic) return true;
-
-    console.log(isPublic, requiredRoles);
-    console.log('year');
     if (!requiredRoles) {
       return false;
     }
-    const user = context.switchToHttp().getRequest();
-    console.log({ role: 'Admin' });
-    console.log('hello', user?.role == requiredRoles);
-    return user?.role == requiredRoles || true;
+
+    const user = context.switchToHttp().getRequest().user;
+    return requiredRoles.some((role) => user.role?.includes(role));
   }
 }
