@@ -1,14 +1,27 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { EventService } from '../service/event.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { EventDto, EventResponeDto } from '../dto/event.dto';
 
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
-  constructor(private readonly appService: EventService) {}
+  constructor(private readonly eventService: EventService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('/create')
+  @ApiBody({type: EventDto})
+  createEvent(
+    @Body() eventInfo: EventDto
+  ): Promise<EventResponeDto>{
+    return this.eventService.createEvent(eventInfo);
+  }
+
+  @Post('/update/:eventId')
+  //@ApiBody()
+  updateEvent(
+    @Body() eventInfo: EventDto,
+    @Query('eventId') eventId: string
+  ): Promise<EventResponeDto>{
+    return this.eventService.updateEvent(eventId, eventInfo);
   }
 }
