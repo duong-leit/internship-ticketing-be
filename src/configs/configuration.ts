@@ -44,7 +44,7 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
   }),
 };
 
-export const googleRecatpChaModuleOption = {
+export const googleRecaptchaModuleOption = {
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
     secretKey: configService.get('recaptchaSecretKey'),
