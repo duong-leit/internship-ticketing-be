@@ -34,7 +34,7 @@ export class AuthService {
       statusCode: 200,
       data: {
         name: existUser.name,
-        avatar: existUser.avatar,
+        avatar: existUser.avatarUrl,
       },
       accessToken: this.generateJWTToken(existUser),
     };

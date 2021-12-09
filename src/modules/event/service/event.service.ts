@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
-import { IEvent } from '../domain/interfaces/IEvent.interface';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
-import { EventModule } from '../event.module';
 import { EventRepository } from '../infrastructure/event.repository';
 
 @Injectable()
@@ -14,67 +12,80 @@ export class EventService {
   ) {}
 
   async getEventByID(eventId: string){
-    return this.eventRepository.findOne({
+    return await this.eventRepository.findOne({
       where: {id: eventId}})
   }
 
-  async getEventByCreator(userId: string){
-    return await this.eventRepository.findOne({
-      where: {userId: userId}})
+  async getEventByCreator(
+    data: { [key: string]: string | number } | undefined = undefined,
+    relations: { arrayRelation: string[] } | undefined = undefined,
+    paging: { pageSize: number; pageIndex: number } | undefined = {
+      pageSize: undefined,
+      pageIndex: undefined
+    }
+  ) {
+    const dataCheck = {
+      [Object.keys(data)[0]]: data[Object.keys(data)[0]],
+    };
+    const take = paging.pageSize || 10;
+    const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
+    //console.log(dataCheck);
+    
+    
+    const [result, total] = await this.eventRepository.findAndCount({
+      relations: relations?.arrayRelation || undefined,
+      where: {
+        userId: data,
+        isDeleted: false,
+      },
+      // order: { name: 'DESC' },
+      take: take,
+      skip: skip === 0 ? 0 : skip * take,
+    });
+
+    //console.log(Object.getOwnPropertyNames(UserResponseDto));
+    console.log(result);
+    
+    return {
+      statusCode: 200,
+      data: result,
+      //data: UserService.transferEntityToDto(result),
+      pagination: {
+        _totalPage: Math.ceil(total / take),
+        _pageSize: take,
+        _pageIndex: skip + 1,
+      },
+    };
   }
 
-  async getEventByCategory(categoryId: string){
+  async getEventsByCategory(categoryId: string){
     return await this.eventRepository.findOne({
+      relations: ['eventCategory'],
       where: {categoryId: categoryId}})
   }
 
-  private async responeMessage(statusCode: number, message: string, data?: object): Promise<EventResponeDto>{
+  private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
     return {
       statusCode: statusCode,
       message: message
     }
   }
 
-  private async manualMapper(eventInfo: EventDto): Promise<EventResponeDto>{
-    return
-    // return{
-    //   name: eventInfo.name,
-    //   eventAddress: eventInfo.eventAddress,
-    //   totalTickets: eventInfo.totalTickets,
-    //   categoryId: eventInfo.categoryId,
-    //   userId: eventInfo.userId,
-    //   ticketPrice: eventInfo.ticketPrice,
-    //   eventStartDate: eventInfo.eventStartDate,
-    //   eventEndDate: eventInfo.eventEndDate,
-    //   saleStartDate: eventInfo.saleStartDate,
-    //   saleEndDate: eventInfo.saleEndDate,
-    //   //availableTicket: number;
-    //   maxTicketOrder: eventInfo.maxTicketOrder,
-    //   minTicketOrder: eventInfo.minTicketOrder,
-    //   logoUrl: eventInfo.logoUrl,
-    //   bannerUrl: eventInfo.bannerUrl,
-    //   description: eventInfo.description,
-    //   eventPlacename: eventInfo.eventPlacename,
-    //   ticketImageUrl: eventInfo.ticketImageUrl,
-    //   organizationInfo: eventInfo.organizationInfo,
-    //   organizationEmail: eventInfo.organizationEmail,
-    //   organizationPhone: eventInfo.organizationPhone,
-    //   organizationAddress: eventInfo.organizationAddress,
-    // }
+  private async responeSuccessMessage(statusCode: number, message: string, data: object): Promise<EventResponeDto>{
+    return {
+      statusCode: statusCode,
+      message: message,
+      data: data
+    }
   }
 
   async createEvent(eventInfo: EventDto): Promise<EventResponeDto>{
-    //Mapping
-    //const newEvent = await this.manualMapper(eventInfo);
-    const newEvent = this.eventRepository.create(eventInfo);
-    console.log(newEvent);
-  
     try {
+      const newEvent = this.eventRepository.create(eventInfo);
       const event = await this.eventRepository.save(newEvent);
-      return this.responeMessage(200, "Event created successfully")
+      return this.responeSuccessMessage(200, "Event created successfully", {id: event.id})
     } catch (error) {
-      console.log(error);
-      return this.responeMessage(400, "Cannot create new event")
+      return this.responeErrorMessage(400, "Cannot create new event", )
     }
   }
 
@@ -82,18 +93,17 @@ export class EventService {
     try {
       const event = await this.getEventByID(eventId);
       if((event).userId != user.userId) {
-        return this.responeMessage(401, "Permission denied");
+        return await this.responeErrorMessage(401, "Permission denied");
       }
       //update Event
       this.eventRepository.save({
         ...event, //existed Info
         ...eventInfo //Update Info
       })
+      return this.responeSuccessMessage(200, "  Event updated successfully", {id: event.id})
     } catch (error) {
-      console.log(error);
-      return error
-      
+      //console.log(error);
+      return this.responeErrorMessage(400, "Cannot update event");
     }
-    return this.responeMessage(200, "Event updated successfully")
   }
 }

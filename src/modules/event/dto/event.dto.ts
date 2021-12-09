@@ -88,4 +88,5 @@ export class EventDto{
 export class EventResponeDto{
     statusCode: number;
     message: string;
+    data?: object;
 }

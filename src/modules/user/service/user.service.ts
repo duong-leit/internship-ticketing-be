@@ -36,7 +36,7 @@ export class UserService {
       birthday: _user.birthday,
       numberPhone: _user.numberPhone,
       gender: _user.gender,
-      avatar: _user.avatar,
+      avatar: _user.avatarUrl,
       isSocial: _user.isSocial,
       roleId: _user.role?.name,
     }));
@@ -97,7 +97,6 @@ export class UserService {
 
   async getByUsername(username: string) {
     return this.userRepository.findOne({
-      relations: ['user'],
       where: { username: username },
     });
   }
