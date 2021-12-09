@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { UserRepository } from 'src/modules/user/infrastructure/user.repository';
+import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { FacebookAuthService } from 'facebook-auth-nestjs';
@@ -11,39 +6,35 @@ import { IFacebookData } from 'src/common/interface/common.interface';
 import { UserService } from 'src/modules/user/service/user.service';
 import {
   FacebookLoginDto,
-  responseLoginDto,
   UserLoginDto,
 } from '../infrastructure/dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly fbService: FacebookAuthService,
     private readonly userService: UserService
   ) {}
 
   async systemLogin(data: UserLoginDto) {
-    const existUser = await this.userService.getByUsername(data.username);
-    if (!existUser) throw new UnauthorizedException('Username is invalid');
-    if (!bcrypt.compareSync(data.password, existUser.password)) {
-      throw new UnauthorizedException('Password is invalid');
-    }
+    const user = await this.userService.getOneUser({ username: data.username });
+    if (!user || !bcrypt.compareSync(data.password, user.password))
+      return { statusCode: 400, message: 'Wrong username or password' };
     return {
       statusCode: 200,
       data: {
-        name: existUser.name,
-        avatar: existUser.avatar,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
       },
-      accessToken: this.generateJWTToken(existUser),
+      accessToken: this.generateJWTToken(user),
     };
   }
 
   async facebookLogin({
     avatarUrl,
     accessToken,
-  }: FacebookLoginDto): Promise<responseLoginDto> {
+  }: FacebookLoginDto) {
     const userInformation: IFacebookData = await this.fbService.getUser(
       accessToken,
       'id',
@@ -51,18 +42,19 @@ export class AuthService {
       'email',
       'birthday'
     );
-    if (!userInformation) {
-      throw new BadRequestException('The token have been expired');
-    }
+    if (!userInformation)
+      return { statusCode: 400, message: 'The token have been expired' };
 
-    const user = await this.userService.getOneUser({username: userInformation.id})
+    const user = await this.userService.getOneUser({
+      username: userInformation.id,
+    });
     if (!user) {
       return {
         statusCode: 401,
         data: {
           name: userInformation.name,
           email: userInformation.email ? userInformation.email : null,
-          avatar: avatarUrl
+          avatarUrl: avatarUrl,
         },
         accessToken: accessToken,
       };
@@ -72,7 +64,7 @@ export class AuthService {
       statusCode: 200,
       data: {
         name: user.name,
-        avatar: avatarUrl,
+        avatarUrl: avatarUrl,
       },
       accessToken: this.generateJWTToken(user),
     };
