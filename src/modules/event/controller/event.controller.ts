@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Request } from '@nestjs/common';
 import { EventService } from '../service/event.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
@@ -16,12 +16,17 @@ export class EventController {
     return this.eventService.createEvent(eventInfo);
   }
 
-  @Post('/update/:eventId')
+  @Put('/update/:eventId')
   //@ApiBody()
+  //Guard
+  //Role
+
   updateEvent(
+    @Request() req: any, 
     @Body() eventInfo: EventDto,
     @Query('eventId') eventId: string
   ): Promise<EventResponeDto>{
+    console.log("Request info", req);
     return this.eventService.updateEvent(eventId, eventInfo);
   }
 }

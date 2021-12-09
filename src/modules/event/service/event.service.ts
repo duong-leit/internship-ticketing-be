@@ -26,31 +26,39 @@ export class EventService {
       where: {categoryId: categoryId}})
   }
 
-  private async manualMapper(eventInfo: EventDto): Promise<IEvent>{
-    return{
-      name: eventInfo.name,
-      eventAddress: eventInfo.eventAddress,
-      totalTickets: eventInfo.totalTickets,
-      categoryId: eventInfo.categoryId,
-      userId: eventInfo.userId,
-      ticketPrice: eventInfo.ticketPrice,
-      eventStartDate: eventInfo.eventStartDate,
-      eventEndDate: eventInfo.eventEndDate,
-      saleStartDate: eventInfo.saleStartDate,
-      saleEndDate: eventInfo.saleEndDate,
-      //availableTicket: number;
-      maxTicketOrder: eventInfo.maxTicketOrder,
-      minTicketOrder: eventInfo.minTicketOrder,
-      logoUrl: eventInfo.logoUrl,
-      bannerUrl: eventInfo.bannerUrl,
-      description: eventInfo.description,
-      eventPlacename: eventInfo.eventPlacename,
-      ticketImageUrl: eventInfo.ticketImageUrl,
-      organizationInfo: eventInfo.organizationInfo,
-      organizationEmail: eventInfo.organizationEmail,
-      organizationPhone: eventInfo.organizationPhone,
-      organizationAddress: eventInfo.organizationAddress,
+  private async responeMessage(statusCode: number, message: string, data?: object): Promise<EventResponeDto>{
+    return {
+      statusCode: statusCode,
+      message: message
     }
+  }
+
+  private async manualMapper(eventInfo: EventDto): Promise<EventResponeDto>{
+    return
+    // return{
+    //   name: eventInfo.name,
+    //   eventAddress: eventInfo.eventAddress,
+    //   totalTickets: eventInfo.totalTickets,
+    //   categoryId: eventInfo.categoryId,
+    //   userId: eventInfo.userId,
+    //   ticketPrice: eventInfo.ticketPrice,
+    //   eventStartDate: eventInfo.eventStartDate,
+    //   eventEndDate: eventInfo.eventEndDate,
+    //   saleStartDate: eventInfo.saleStartDate,
+    //   saleEndDate: eventInfo.saleEndDate,
+    //   //availableTicket: number;
+    //   maxTicketOrder: eventInfo.maxTicketOrder,
+    //   minTicketOrder: eventInfo.minTicketOrder,
+    //   logoUrl: eventInfo.logoUrl,
+    //   bannerUrl: eventInfo.bannerUrl,
+    //   description: eventInfo.description,
+    //   eventPlacename: eventInfo.eventPlacename,
+    //   ticketImageUrl: eventInfo.ticketImageUrl,
+    //   organizationInfo: eventInfo.organizationInfo,
+    //   organizationEmail: eventInfo.organizationEmail,
+    //   organizationPhone: eventInfo.organizationPhone,
+    //   organizationAddress: eventInfo.organizationAddress,
+    // }
   }
 
   async createEvent(eventInfo: EventDto): Promise<EventResponeDto>{
@@ -61,22 +69,16 @@ export class EventService {
   
     try {
       const event = await this.eventRepository.save(newEvent);
-      return{
-        statusCode: 200,
-        message: "Event created successfully"
-      }
+      return this.responeMessage(200, "Event created successfully")
     } catch (error) {
       console.log(error);
-      return{
-        statusCode: 400,
-        message: "Can't create new event"
-      }
+      return this.responeMessage(400, "Cannot create new event")
     }
   }
 
   async updateEvent(eventId: string, eventInfo: EventDto): Promise<EventResponeDto>{
     try {
-      //this.getEventByID
+      const event = this.getEventByID(eventId);
       
     } catch (error) {
       
