@@ -103,18 +103,17 @@ export class UserService {
   }
 
   private async saveUser(newData: IUser) {
-    if (!newData.email) {
-      throw new BadRequestException('Email is required');
-    }
+    const user = await this.getOneUser({email: newData.email})
+    if (user)
+      return { statusCode: 400, message:  'Email is already taken'}
 
-    const user = await this.getByEmail(newData.email);
-    if (user) {
-      throw new BadRequestException('Email is already used');
-    }
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
-    return await this.userRepository.save(newData);
+    const result = await this.userRepository.save(newData);
+    if(!result)
+      return { statusCode: 500, message:  'Server Error'}
+    return { statusCode: 200, message:  'Create successful'}
   }
 
   async createSystemUser(
@@ -127,9 +126,7 @@ export class UserService {
       isSocial: false,
       password: await bcrypt.hash(userInfo.password, SALT_OR_ROUNDS),
     };
-    await this.saveUser(userInformation);
-
-    return { statusCode: 200 };
+    return await this.saveUser(userInformation);
   }
 
   async createFacebookUser(

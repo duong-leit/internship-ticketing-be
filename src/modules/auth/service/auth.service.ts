@@ -24,7 +24,7 @@ export class AuthService {
     private readonly userService: UserService
   ) {}
 
-  async systemLogin(data: UserLoginDto): Promise<responseLoginDto> {
+  async systemLogin(data: UserLoginDto) {
     const existUser = await this.userService.getByUsername(data.username);
     if (!existUser) throw new UnauthorizedException('Username is invalid');
     if (!bcrypt.compareSync(data.password, existUser.password)) {
