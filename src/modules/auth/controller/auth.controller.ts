@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import {
   ApiBody,
   ApiForbiddenResponse,
@@ -14,6 +14,8 @@ import {
   UserLoginDto,
 } from '../infrastructure/dto/login.dto';
 import { Recaptcha } from '@nestlab/google-recaptcha';
+import { Response } from 'express';
+import { transferResponse } from '../../../common/utils/transferResponse';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,6 +39,7 @@ export class AuthController {
   }
 
   @Post('fb-login')
+  @Recaptcha({ action: 'login' })
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({ status: 401, description: 'user is invalid' })
   @ApiForbiddenResponse({
@@ -45,8 +48,10 @@ export class AuthController {
   })
   @ApiBody({ type: FacebookLoginDto })
   async facebookLogin(
-    @Body() user: FacebookLoginDto
-  ): Promise<responseLoginDto> {
-    return await this.authService.facebookLogin(user);
+    @Body() user: FacebookLoginDto,
+    @Res() res: Response
+  ) {
+    const response = await this.authService.facebookLogin(user);
+    transferResponse(res, response);
   }
 }
