@@ -36,7 +36,7 @@ export class UserService {
       birthday: _user.birthday,
       numberPhone: _user.numberPhone,
       gender: _user.gender,
-      avatar: _user.avatar,
+      avatar: _user.avatarUrl,
       isSocial: _user.isSocial,
       roleId: _user.role?.name,
     }));
@@ -88,25 +88,10 @@ export class UserService {
     };
   }
 
-  async getByEmail(email: string) {
-    return this.userRepository.findOne({
-      relations: ['role'],
-      where: { email: email },
-    });
-  }
-
-  async getByUsername(username: string) {
-    return this.userRepository.findOne({
-      relations: ['role'],
-      where: { username: username },
-    });
-  }
-
   private async saveUser(newData: IUser) {
     const user = await this.getOneUser({email: newData.email})
     if (user)
       return { statusCode: 400, message:  'Email is already taken'}
-
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
@@ -151,7 +136,7 @@ export class UserService {
       name: userValue.name,
       username: userValue.id,
       email: userValue.email,
-      avatar: userInfo.data.avatarUrl || null,
+      avatarUrl: userInfo.data.avatarUrl || null,
       birthday: userValue.birthday || null,
       isSocial: true,
     };

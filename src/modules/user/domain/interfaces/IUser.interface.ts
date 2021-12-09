@@ -16,7 +16,7 @@ export interface IUser {
 
   phoneNumber?: string;
 
-  avatar?: string;
+  avatarUrl?: string;
 
   roleId?: string;
 

@@ -37,7 +37,7 @@ export class UserEntity extends AppBaseEntity {
   gender: GenderEnum;
 
   @Column({ type: 'text', nullable: true })
-  avatar: string | null;
+  avatarUrl: string | null;
 
   @Column({ type: 'boolean', default: 0 })
   isSocial: boolean;
