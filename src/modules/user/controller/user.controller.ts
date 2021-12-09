@@ -39,11 +39,14 @@ export class UserController {
     },
     @Res() res: Response
   ){
+    const filter = data.filter ?? data.filter;
+    const pagination = data.pagination ?? {pageSize: data.pagination?.pageSize,
+      pageIndex: data.pagination?.pageIndex}
+
     const response = await this.userServices.getListUser(
-      {...data.filter},
+      {...filter},
       {arrayRelation: ['role']},
-      {pageSize: data.pagination.pageSize,
-        pageIndex: data.pagination.pageIndex},
+      {...pagination}
     )
     transferResponse(res, response)
   }

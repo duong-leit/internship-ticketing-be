@@ -25,20 +25,23 @@ export class UserService {
     private readonly fbService: FacebookAuthService
   ) {}
 
-  private static transferEntityToDto(users: UserEntity[]): UserResponseDto[] {
+  private static transferEntityToDto(
+    users: UserEntity[], ignore:{ [key: string]: boolean }  | undefined = undefined
+  ): UserResponseDto[] {
     return users.map((_user) => ({
-      id: _user.id,
-      createdAt: _user.createdAt,
-      updatedAt: _user.name,
-      name: _user.name,
-      email: _user.email,
-      username: _user.username,
-      birthday: _user.birthday,
-      numberPhone: _user.numberPhone,
-      gender: _user.gender,
-      avatar: _user.avatarUrl,
-      isSocial: _user.isSocial,
-      roleId: _user.role?.name,
+      id: !ignore['id'] ? _user.id : undefined,
+      createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
+      updatedAt: !ignore['name'] ? _user.name : undefined,
+      name: !ignore['name'] ? _user.name : undefined,
+      email: !!ignore['email'] ? _user.email : undefined,
+      username: !ignore['username'] ? _user.username : undefined,
+      birthday: !ignore['birthday'] ? _user.birthday : undefined,
+      numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
+      gender: !ignore['gender'] ? _user.gender : undefined,
+      avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
+      isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
+      role: !ignore['role'] ? _user.role?.name : undefined,
+      roleId: !ignore['roleId'] ? _user.roleId : undefined
     }));
   }
 
@@ -62,7 +65,10 @@ export class UserService {
     relations: { arrayRelation: string[] } | undefined =  {
       arrayRelation: ['role'],
     },
-    paging: { pageSize: number; pageIndex: number } | undefined = undefined
+    paging: { pageSize: number | undefined; pageIndex: number | undefined } | undefined = {
+      pageSize: 10,
+      pageIndex: 1
+    }
   ) {
     const dataCheck = {
       [Object.keys(data)[0]]: Like(`%${data[Object.keys(data)[0]]}%`),
@@ -83,7 +89,7 @@ export class UserService {
     console.log(Object.getOwnPropertyNames(UserResponseDto));
     return {
       statusCode: 200,
-      data: UserService.transferEntityToDto(result),
+      data: UserService.transferEntityToDto(result, {roleId: true}),
       pagination: {
         _totalPage: Math.ceil(total / take),
         _pageSize: take,

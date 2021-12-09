@@ -2,6 +2,8 @@ import { RoleEntity } from '../../../role/domain/entities/role.entity';
 import { GenderEnum } from '../enums/gender.enum';
 
 export interface IUser {
+  id? : string;
+
   email?: string;
 
   name?: string;
@@ -21,6 +23,8 @@ export interface IUser {
   roleId?: string;
 
   role?: RoleEntity;
+
+  createdAt? : string;
 
   isSocial?: boolean;
 }
