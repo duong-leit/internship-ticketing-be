@@ -6,17 +6,21 @@ import { UserService } from './service/user.service';
 import { RoleModule } from '../role/role.module';
 import { BankRepository } from './infrastructure/bank.repository';
 import { WalletRepository } from './infrastructure/wallet.repository';
+import { FacebookAuthModule } from 'facebook-auth-nestjs';
+import { facebookAuthModuleOption } from 'src/configs/configuration';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    UserRepository,
-    BankRepository,
-    WalletRepository,
-  ]),
-    RoleModule
+  imports: [
+    FacebookAuthModule.forRootAsync(facebookAuthModuleOption),
+    TypeOrmModule.forFeature([
+      UserRepository,
+      BankRepository,
+      WalletRepository,
+    ]),
+    RoleModule,
   ],
   controllers: [UserController],
   providers: [UserService],
-  exports: [TypeOrmModule,UserService],
+  exports: [TypeOrmModule, UserService],
 })
 export class UserModule {}

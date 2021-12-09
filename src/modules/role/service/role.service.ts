@@ -21,7 +21,7 @@ export class RoleService {
     private readonly rolePermissionRepository: RolePermissionRepository
   ) {}
 
-  async compareRolePermission(
+  private async compareRolePermission(
     newRPArray: RolePermissionRequestDto[],
     oldRPArray: IRolePermissionInterface[]
   ) {
@@ -85,9 +85,12 @@ export class RoleService {
     );
 
     return {
-      role,
-      permission,
-      rolePermission,
+      statusCode: 200,
+      data: {
+        role,
+        permission,
+        rolePermission,
+      }
     };
   }
 

@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'path';
-import { TypeOrmModuleAsyncOptions} from '@nestjs/typeorm';
+import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import { ACTION_RECAPTCHA, SCORE_RECAPTCHA } from 'src/common/constant';
 
 
 export default () => ({
@@ -13,7 +13,12 @@ export default () => ({
     password: `${process.env.DATABASE_PASSWORD}`,
     sync: process.env.DATABASE_SYNCHRONIZE === 'true',
     autoLoadEntities: process.env.DATABASE_AUTOLOADENTITIES === 'true',
+    ssl: process.env.DATABASE_SSL === 'true',
   },
+  jwtSecretKey: process.env.JWT_SECRET_KEY,
+  recaptchaSecretKey: process.env.GOOGLE_RECAPTCHA_SECRET_KEY,
+  facebookClientId: process.env.CLIENT_ID,
+  facebookClientSecret: process.env.CLIENT_SECRET,
 });
 
 export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
@@ -26,9 +31,48 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
     username: configService.get('database.user'),
     password: configService.get('database.password'),
     database: configService.get('database.name'),
-    entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+    entities: [__dirname + '/../**/*.entity.{js,ts}'],
     autoLoadEntities: configService.get('database.autoLoadEntities'),
     synchronize: configService.get('database.sync'),
-  })
+    ssl: configService.get('database.ssl'),
+    extra:
+      configService.get('database.ssl') === true
+        ? {
+            ssl: { rejectUnauthorized: false },
+          }
+        : {},
+  }),
 };
 
+export const googleRecaptchaModuleOption = {
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    secretKey: configService.get('recaptchaSecretKey'),
+    response: (req) => (req.headers.recaptcha || '').toString(),
+    // skipIf: process.env.NODE_ENV !== 'production',
+    actions: ACTION_RECAPTCHA,
+    score: SCORE_RECAPTCHA,
+  }),
+  inject: [ConfigService],
+};
+
+export const facebookAuthModuleOption = {
+  imports: [ConfigModule],
+  useFactory: (configService: ConfigService) => ({
+    clientId: configService.get('facebookClientId'), //CLIENT_ID,
+    clientSecret: configService.get('facebookClientSecret'), //CLIENT_SECRET,
+  }),
+  inject: [ConfigService],
+};
+
+export const jwtModuleOption = {
+  imports: [ConfigModule],
+  useFactory: async (configService: ConfigService) => {
+    console.log(configService);
+    return {
+      secret: configService.get<string>('jwtSecretKey'),
+      signOptions: { expiresIn: '7d' },
+    };
+  },
+  inject: [ConfigService],
+};

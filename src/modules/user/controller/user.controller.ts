@@ -1,26 +1,85 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
-import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
+import { Body, Controller, Param, Post, Res } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Recaptcha } from '@nestlab/google-recaptcha';
+import {
+  CreateFacebookUserDto,
+  CreateSystemUserDto, GetListUserDto,
+  UserResponseDto,
+} from '../dto/user.dto';
 import { UserService } from '../service/user.service';
+import { transferResponse } from '../../../common/utils/transferResponse';
+import {Response} from 'express';
+
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private userServices: UserService) {}
 
+  @Post()
+  @ApiBody({
+    type: GetListUserDto
+  })
+  @ApiBadRequestResponse()
+  async getUserPaging(
+    @Param() param: {id: string},
+    @Body() data: {
+      filter:{
+        [key: string]: string | number
+      },
+      pagination: {
+        pageSize: number, pageIndex: number
+      }
+    },
+    @Res() res: Response
+  ){
+    const response = await this.userServices.getListUser(
+      {...data.filter},
+      {arrayRelation: ['role']},
+      {pageSize: data.pagination.pageSize,
+        pageIndex: data.pagination.pageIndex},
+    )
+    transferResponse(res, response)
+  }
+
   @Post('/register')
+  @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
     type: UserResponseDto,
   })
-  @ApiForbiddenResponse({
-    description: 'Forbidden.',
+  @ApiBadRequestResponse({
+    description: 'Email is already used',
   })
-
+  @ApiHeader({
+    name: 'recaptcha',
+    description: 'google recaptcha',
+  })
   @ApiBody({ type: CreateSystemUserDto })
-  async createUser(
-    @Body() userInfo: CreateSystemUserDto,
+  registerUser(
+    @Body() userInfo: CreateSystemUserDto
   ): Promise<UserResponseDto> {
-    return this.userServices.registerUser(userInfo);
+    return this.userServices.createSystemUser(userInfo);
+  }
+
+  @Post('/facebookRegister')
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+    type: UserResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Email is already used',
+  })
+  @ApiBody({ type: CreateFacebookUserDto })
+  registerFacebookUser(
+    @Body() userInfo: CreateFacebookUserDto
+  ): Promise<UserResponseDto> {
+    return this.userServices.createFacebookUser(userInfo);
   }
 }
