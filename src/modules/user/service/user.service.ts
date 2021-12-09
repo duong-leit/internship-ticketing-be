@@ -26,7 +26,7 @@ export class UserService {
   ) {}
 
   private static transferEntityToDto(users: UserEntity[]): UserResponseDto[] {
-    return users.map((_user) =>({
+    return users.map((_user) => ({
       id: _user.id,
       createdAt: _user.createdAt,
       updatedAt: _user.name,
@@ -44,7 +44,9 @@ export class UserService {
 
   async getOneUser(
     data: { [key: string]: string | number } | undefined = undefined,
-    relations: { arrayRelation: string[] } | undefined = undefined
+    relations: { arrayRelation: string[] } | undefined = {
+      arrayRelation: ['role'],
+    }
   ): Promise<UserEntity | undefined> {
     return await this.userRepository.findOne({
       relations: relations?.arrayRelation || undefined,
@@ -57,7 +59,9 @@ export class UserService {
 
   async getListUser(
     data: { [key: string]: string | number } | undefined = undefined,
-    relations: { arrayRelation: string[] } | undefined = undefined,
+    relations: { arrayRelation: string[] } | undefined =  {
+      arrayRelation: ['role'],
+    },
     paging: { pageSize: number; pageIndex: number } | undefined = undefined
   ) {
     const dataCheck = {
@@ -89,16 +93,14 @@ export class UserService {
   }
 
   private async saveUser(newData: IUser) {
-    const user = await this.getOneUser({email: newData.email})
-    if (user)
-      return { statusCode: 400, message:  'Email is already taken'}
+    const user = await this.getOneUser({ email: newData.email });
+    if (user) return { statusCode: 400, message: 'Email is already taken' };
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
     const result = await this.userRepository.save(newData);
-    if(!result)
-      return { statusCode: 500, message:  'Server Error'}
-    return { statusCode: 200, message:  'Create successful'}
+    if (!result) return { statusCode: 500, message: 'Server Error' };
+    return { statusCode: 200, message: 'Create successful' };
   }
 
   async createSystemUser(
