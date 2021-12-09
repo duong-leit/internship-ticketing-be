@@ -22,8 +22,8 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Recaptcha({ action: 'login' })
   @Post('system-login')
+  @Recaptcha({ action: 'login' })
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({
     status: 401,
@@ -34,12 +34,16 @@ export class AuthController {
     description: 'google recaptcha',
   })
   @ApiBody({ type: UserLoginDto })
-  login(@Body() user: UserLoginDto): Promise<responseLoginDto> {
-    return this.authService.systemLogin(user);
+  async login(
+    @Body() user: UserLoginDto,
+    @Res () res: Response
+  ) {
+    const response = await this.authService.systemLogin(user);
+    transferResponse(res, response)
   }
 
   @Post('fb-login')
-  @Recaptcha({ action: 'login' })
+  // @Recaptcha({ action: 'login' })
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({ status: 401, description: 'user is invalid' })
   @ApiForbiddenResponse({

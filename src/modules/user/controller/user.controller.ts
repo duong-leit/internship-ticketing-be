@@ -62,10 +62,12 @@ export class UserController {
     description: 'google recaptcha',
   })
   @ApiBody({ type: CreateSystemUserDto })
-  registerUser(
-    @Body() userInfo: CreateSystemUserDto
-  ): Promise<UserResponseDto> {
-    return this.userServices.createSystemUser(userInfo);
+  async registerUser(
+    @Body() userInfo: CreateSystemUserDto,
+    @Res () res: Response
+  ) {
+    const response = await this.userServices.createSystemUser(userInfo);
+    transferResponse(res, response);
   }
 
   @Post('/facebookRegister')
