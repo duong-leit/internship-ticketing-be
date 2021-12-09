@@ -85,9 +85,12 @@ export class RoleService {
     );
 
     return {
-      role,
-      permission,
-      rolePermission,
+      statusCode: 200,
+      data: {
+        role,
+        permission,
+        rolePermission,
+      }
     };
   }
 
