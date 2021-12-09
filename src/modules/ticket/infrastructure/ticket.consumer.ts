@@ -9,10 +9,11 @@ export class generateTicketConsumer {
   async generate(job: Job<{ eventId: string; sellerId: string; id: number }>) {
     try {
       // call tatum => token
+      // add token to wallet seller
       console.log('Lần: ', job.data.id);
       await this.ticketRepository.insert({
         eventId: job.data.eventId,
-        nftToken: '123',
+        nftToken: job.data.id.toString(),
       });
     } catch (error) {
       console.log({ status: error?.statusCode, message: error?.message });

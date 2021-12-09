@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TicketController } from './controller/ticket.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TicketRepository } from './infrastructure/ticket.repository';
@@ -6,14 +6,22 @@ import { TicketService } from './service/ticket.service';
 import { BullModule } from '@nestjs/bull';
 import { generateTicketConsumer } from './infrastructure/ticket.consumer';
 import processor from './infrastructure/ticket.processor';
+import { PaymentModule } from '../payment/payment.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([TicketRepository]),
+    forwardRef(() => PaymentModule),
     BullModule.forRootAsync({
       useFactory: () => ({
         redis: {
           host: 'localhost',
           port: 6379,
+        },
+        limiter: {
+          max: 5,
+          duration: 1000,
+          bounceBack: false,
         },
       }),
     }),
@@ -24,6 +32,6 @@ import processor from './infrastructure/ticket.processor';
   ],
   controllers: [TicketController],
   providers: [TicketService, generateTicketConsumer],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, TicketService],
 })
 export class TicketModule {}

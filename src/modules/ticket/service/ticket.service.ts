@@ -1,82 +1,71 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { TicketEntity } from '../domain/entities/ticket.entity';
+import { PaymentService } from 'src/modules/payment/service/payment.service';
 import { TicketStatusEnum } from '../domain/enums/ticketStatus.enum';
-import { ICreateTicket } from '../infrastructure/ticket.interface';
+// import { ICreateTicket } from '../domain/interfaces/ITicket.interface';
 import { TicketRepository } from '../infrastructure/ticket.repository';
 
 @Injectable()
 export class TicketService {
   constructor(
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
-    private readonly ticketRepository: TicketRepository
+    @InjectQueue('transfer-ticket-token') private transferTiket: Queue,
+    private readonly ticketRepository: TicketRepository,
+    @Inject(forwardRef(() => PaymentService))
+    private readonly paymentService: PaymentService
   ) {}
   async getHello(): Promise<string> {
-    await this.createTicketAsync();
+    await this.createTicketsByEvent();
     return 'Hello World!';
   }
 
-  async createTicketAsync() {
+  async createTicketsByEvent(): Promise<void> {
     //data: ICreateTicket
     const data = {
-      sellerId: 'ec6b5e5a-bddf-4c8f-88bc-661597070e8a',
-      totalTicket: 3,
-      eventId: '0174fbfc-8d47-4a96-924d-f364cc076b38',
+      userId: 'ec6b5e5a-bddf-4c8f-88bc-661597070e8a',
+      amount: 10,
+      eventId: '4fd369aa-75de-47d1-99ad-6e6cee11418e',
     };
-
-    for (let count = 1; count < data.totalTicket; count++) {
-      await this.generateTiket.add(
-        'generate',
-        {
-          eventId: data.eventId,
-          sellerId: data.sellerId,
-          id: count,
-        }
-        // { delay: 1000 * count }
-      );
+    for (let count = 0; count < data.amount; count++) {
+      await this.generateTiket.add('generate', {
+        eventId: data.eventId,
+        sellerId: data.userId,
+        id: (Math.random() * 1000000).toString(), // fake token
+      });
     }
-    console.log('\n');
-    return { statusCode: 200 };
   }
 
-  async getTicket(
+  async getTickets(
     condition: { [field: string]: string },
     takeNumber?: number,
-    pageNumber?: number
+    page?: number
   ) {
-    // condition: {[field:string]: string}, take: number
-    try {
-      const ticket = await this.ticketRepository.find({
-        where: condition,
-        take: takeNumber,
-        skip: pageNumber * takeNumber,
-        // where: {
-        //   eventId: '0174fbfc-8d47-4a96-924d-f364cc076b38',
-        //   status: TicketStatusEnum.Ready,
-        // },
-        // take: 2,
-      });
-      const tokenArray: string[] = ticket.map((element) => element.nftToken);
-      console.log(tokenArray);
-      return tokenArray;
-    } catch (error) {
-      console.log(error.message);
-      return { statusCode: error.statusCode, message: error.message };
-    }
+    const ticket = await this.ticketRepository.find({
+      where: condition,
+      take: takeNumber,
+      skip: (page - 1) * takeNumber,
+    });
+    const tokenArray: string[] = ticket.map((element) => element.nftToken);
+    return tokenArray;
   }
 
-  async deleteTicket(data: string[]) {
-    try {
-      await this.ticketRepository.delete(data);
-      // data.forEach(async (id) => {
-      //   await this.ticketRepository.update(id, {
-      //     status: TicketStatusEnum.Sold,
-      //   });
-      // });
-      return true;
-    } catch (error) {
-      return { statusCode: error.statusCode, message: error.message };
+  async updateTicket(ticket: string) {
+    await this.ticketRepository.update(
+      { nftToken: ticket },
+      { status: TicketStatusEnum.Sold }
+    );
+    return true;
+  }
+
+  async transferTicketOwner(orderId: string, eventId: string, amount: number) {
+    const ticketList = await this.getTickets(
+      { eventId: eventId, status: TicketStatusEnum.Ready },
+      amount
+    );
+    for (const nftToken of ticketList) {
+      await this.paymentService.createOrderDetail({ nftToken, orderId });
+      await this.updateTicket(nftToken);
     }
   }
 }
