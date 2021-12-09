@@ -86,7 +86,6 @@ export class UserService {
       skip: skip === 0 ? 0 : skip * take,
     });
 
-    console.log(Object.getOwnPropertyNames(UserResponseDto));
     return {
       statusCode: 200,
       data: UserService.transferEntityToDto(result, {roleId: true}),
