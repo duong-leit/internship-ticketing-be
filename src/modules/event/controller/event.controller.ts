@@ -20,13 +20,17 @@ export class EventController {
   //@ApiBody()
   //Guard
   //Role
-
   updateEvent(
     @Request() req: any, 
     @Body() eventInfo: EventDto,
     @Query('eventId') eventId: string
   ): Promise<EventResponeDto>{
-    console.log("Request info", req);
-    return this.eventService.updateEvent(eventId, eventInfo);
+    const user = {
+      userId: "22e60f44-f4ed-4a70-923d-c76ed756a31d",
+      email: "123@gmail.com",
+      role: "User",
+    }
+    //console.log("Request info", req);
+    return this.eventService.updateEvent(eventId, eventInfo, user);
   }
 }

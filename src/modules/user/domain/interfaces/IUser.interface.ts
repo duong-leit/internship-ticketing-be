@@ -24,3 +24,11 @@ export interface IUser {
 
   isSocial?: boolean;
 }
+
+export interface IJwtUser{
+  userId: string;
+
+  email: string;
+  
+  role: string;
+}

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
 import { IEvent } from '../domain/interfaces/IEvent.interface';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
+import { EventModule } from '../event.module';
 import { EventRepository } from '../infrastructure/event.repository';
 
 @Injectable()
@@ -17,12 +19,12 @@ export class EventService {
   }
 
   async getEventByCreator(userId: string){
-    return this.eventRepository.findOne({
+    return await this.eventRepository.findOne({
       where: {userId: userId}})
   }
 
   async getEventByCategory(categoryId: string){
-    return this.eventRepository.findOne({
+    return await this.eventRepository.findOne({
       where: {categoryId: categoryId}})
   }
 
@@ -76,13 +78,22 @@ export class EventService {
     }
   }
 
-  async updateEvent(eventId: string, eventInfo: EventDto): Promise<EventResponeDto>{
+  async updateEvent(eventId: string, eventInfo: EventDto, user: IJwtUser): Promise<EventResponeDto>{
     try {
-      const event = this.getEventByID(eventId);
-      
+      const event = await this.getEventByID(eventId);
+      if((event).userId != user.userId) {
+        return this.responeMessage(401, "Permission denied");
+      }
+      //update Event
+      this.eventRepository.save({
+        ...event, //existed Info
+        ...eventInfo //Update Info
+      })
     } catch (error) {
+      console.log(error);
+      return error
       
     }
-    return
+    return this.responeMessage(200, "Event updated successfully")
   }
 }

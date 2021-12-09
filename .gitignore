@@ -7,8 +7,6 @@
 
 /remove
 
-/.yarn-lock
-
 # Logs
 logs
 *.log
