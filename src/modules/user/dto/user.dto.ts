@@ -36,6 +36,27 @@ class FacebookDataDto {
   avatarUrl?: string;
 }
 
+export class filterDto{
+  @ApiProperty()
+  key : string | number
+}
+
+export class paginationDto{
+  @ApiProperty()
+  pageSize: number;
+
+  @ApiProperty()
+  pageIndex: number
+}
+
+export class GetListUserDto {
+  @ApiProperty({type: filterDto})
+  filter: filterDto
+
+  @ApiProperty({type: paginationDto})
+  pagination: paginationDto
+}
+
 export class CreateSystemUserDto {
   @IsEmail()
   @IsNotEmpty()
@@ -92,11 +113,11 @@ export class UserResponseDto {
   @IsOptional()
   gender?: GenderEnum;
 
-  @ApiProperty()
-  @IsOptional()
-  phoneNumber?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  avatar?: string;
+  // @ApiProperty()
+  // @IsOptional()
+  // phoneNumber?: string;
+  //
+  // @ApiProperty()
+  // @IsOptional()
+  // avatar?: string;
 }
