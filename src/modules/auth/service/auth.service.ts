@@ -55,13 +55,14 @@ export class AuthService {
       throw new BadRequestException('The token have been expired');
     }
 
-    const user = await this.userService.getByUsername(userInformation.id);
+    const user = await this.userService.getOneUser({username: userInformation.id})
     if (!user) {
       return {
         statusCode: 401,
         data: {
           name: userInformation.name,
           email: userInformation.email ? userInformation.email : null,
+          avatar: avatarUrl
         },
         accessToken: accessToken,
       };
