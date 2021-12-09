@@ -27,7 +27,8 @@ export class UserService {
 
   private static transferEntityToDto(
     users: UserEntity[], ignore:{ [key: string]: boolean }  | undefined = undefined
-  ): UserResponseDto[] {
+  ) {
+
     return users.map((_user) => ({
       id: !ignore['id'] ? _user.id : undefined,
       createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
@@ -37,6 +38,7 @@ export class UserService {
       username: !ignore['username'] ? _user.username : undefined,
       birthday: !ignore['birthday'] ? _user.birthday : undefined,
       numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
+      password: !ignore['password'] ? _user.password : undefined,
       gender: !ignore['gender'] ? _user.gender : undefined,
       avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
       isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
@@ -50,14 +52,19 @@ export class UserService {
     relations: { arrayRelation: string[] } | undefined = {
       arrayRelation: ['role'],
     }
-  ): Promise<UserEntity | undefined> {
-    return await this.userRepository.findOne({
+  ) {
+    const user = await this.userRepository.findOne({
       relations: relations?.arrayRelation || undefined,
       where: {
         ...data,
         isDeleted: false,
       },
     });
+
+    return {
+      statusCode: 200,
+      data: UserService.transferEntityToDto([user], {roleId: true})[0],
+    };
   }
 
   async getListUser(
@@ -65,7 +72,7 @@ export class UserService {
     relations: { arrayRelation: string[] } | undefined =  {
       arrayRelation: ['role'],
     },
-    paging: { pageSize: number | undefined; pageIndex: number | undefined } | undefined = {
+    paging: { pageSize?: number; pageIndex: number | undefined } | undefined = {
       pageSize: 10,
       pageIndex: 1
     }
@@ -88,7 +95,11 @@ export class UserService {
 
     return {
       statusCode: 200,
-      data: UserService.transferEntityToDto(result, {roleId: true}),
+      data: UserService.transferEntityToDto(result,
+        {
+        roleId: true,
+        password: true
+      }),
       pagination: {
         _totalPage: Math.ceil(total / take),
         _pageSize: take,
