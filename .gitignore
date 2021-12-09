@@ -2,12 +2,9 @@
 /dist
 /node_modules
 .env.development
-.env.production
 .env.staging
 
 /remove
-
-/.yarn-lock
 
 # Logs
 logs

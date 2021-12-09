@@ -49,7 +49,7 @@ export const googleRecaptchaModuleOption = {
   useFactory: (configService: ConfigService) => ({
     secretKey: configService.get('recaptchaSecretKey'),
     response: (req) => (req.headers.recaptcha || '').toString(),
-    // skipIf: process.env.NODE_ENV !== 'production',
+    skipIf: process.env.NODE_ENV !== 'production',
     actions: ACTION_RECAPTCHA,
     score: SCORE_RECAPTCHA,
   }),
