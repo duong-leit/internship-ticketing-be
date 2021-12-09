@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -15,12 +15,28 @@ import {
 import { UserService } from '../service/user.service';
 import { transferResponse } from '../../../common/utils/transferResponse';
 import {Response} from 'express';
+import { BankService } from '../service/bank.service';
 
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userServices: UserService) {}
+  constructor(private userServices: UserService,private bankService: BankService) {}
+
+  @Post('bank')
+  async createBank(@Res() res: Response){
+    const response = await this.bankService.createBank();
+    transferResponse(res,response);
+  }
+
+  @Get('/:bankId')
+  async getBankById(
+    @Query('bank ID') bankId: string,
+    @Res() res: Response
+  ){
+    const response = await this.bankService.getOneBank({id: bankId})
+    transferResponse(res,response);
+  }
 
   @Post()
   @ApiBody({
