@@ -6,52 +6,52 @@ import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
-  @Column({ type: 'text', nullable: false})
+  @Column({ type: 'text', nullable: true })
   name: string;
 
-  @Column({ type: 'text', nullable: false })
-  logoUrl: string;
+  @Column({ type: 'text', nullable: true })
+  logoUrl?: string;
 
-  @Column({ type: 'text', nullable: false })
-  bannerUrl: string;
+  @Column({ type: 'text', nullable: true })
+  bannerUrl?: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   eventPlacename: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   eventAddress: string;
 
-  @Column({ type: 'date', nullable: false })
-  saleStartDay: string;
+  @Column({ type: 'date', nullable: true })
+  saleStartDate: string;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   saleEndDate: string;
 
-  @Column({ type: 'date', nullable: false })
-  eventStartDay: string;
+  @Column({ type: 'date', nullable: true })
+  eventStartDate: string;
 
-  @Column({ type: 'date', nullable: false })
-  eventEndDay: string;
+  @Column({ type: 'date', nullable: true })
+  eventEndDate: string;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   totalTickets: number;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   availableTickets: number;
 
-  @Column({ type: 'text', nullable: false })
-  ticketImageUrl: string;
+  @Column({ type: 'text', nullable: true })
+  ticketImageUrl?: string;
 
-  @Column({ type: 'decimal', nullable: false })
+  @Column({ type: 'decimal', nullable: true })
   ticketPrice: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   maxTicketOrder: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   minTicketOrder: number;
 
   @Column({ type: 'text', nullable: true })
@@ -60,36 +60,39 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 321, nullable: true })
   organizationEmail: string | null;
 
-  @Column({ type: 'varchar', length: 11, nullable: false })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   organizationPhone: string | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   organizationAddress: string | null;
 
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Ready })
+  @Column({
+    type: 'enum',
+    enum: EventStatusEnum,
+    default: EventStatusEnum.Pending,
+  })
   status: EventStatusEnum;
 
-  @Column({type: 'uuid', name: 'categoryId'})
+  @Column({ type: 'uuid', name: 'categoryId' })
   categoryId: string;
 
-  @Column({type: 'uuid', name: 'userId'})
+  @Column({ type: 'uuid', name: 'userId' })
   userId: string;
 
   @ManyToOne(
     () => EventCategoryEntity,
-    (category: EventCategoryEntity) => category.id)
-  @JoinColumn({name: 'categoryId'})
+    (category: EventCategoryEntity) => category.id
+  )
+  @JoinColumn({ name: 'categoryId' })
   category!: EventCategoryEntity;
 
-  @ManyToOne(
-    () => UserEntity,
-    (publisher: UserEntity) => publisher.id)
-  @JoinColumn({name: 'userId'})
+  @ManyToOne(() => UserEntity, (publisher: UserEntity) => publisher.id)
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
   @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)
-  order: OrderEntity[]
+  order: OrderEntity[];
 }
