@@ -8,6 +8,7 @@ import { BankRepository } from './infrastructure/bank.repository';
 import { WalletRepository } from './infrastructure/wallet.repository';
 import { FacebookAuthModule } from 'facebook-auth-nestjs';
 import { facebookAuthModuleOption } from 'src/configs/configuration';
+import { BankService } from './service/bank.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { facebookAuthModuleOption } from 'src/configs/configuration';
     RoleModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, BankService],
   exports: [TypeOrmModule, UserService],
 })
 export class UserModule {}

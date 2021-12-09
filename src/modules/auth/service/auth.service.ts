@@ -19,13 +19,13 @@ export class AuthService {
 
   async systemLogin(data: UserLoginDto) {
     const user = await this.userService.getOneUser({ username: data.username });
-    if (!user || !bcrypt.compareSync(data.password, user.password))
+    if (!user || !bcrypt.compareSync(data.password, user.data.password))
       return { statusCode: 400, message: 'Wrong username or password' };
     return {
       statusCode: 200,
       data: {
-        name: user.name,
-        avatarUrl: user.avatarUrl,
+        name: user.data.name,
+        avatarUrl: user.data.avatarUrl,
       },
       accessToken: this.generateJWTToken(user),
     };
@@ -63,7 +63,7 @@ export class AuthService {
     return {
       statusCode: 200,
       data: {
-        name: user.name,
+        name: user.data.name,
         avatarUrl: avatarUrl,
       },
       accessToken: this.generateJWTToken(user),
