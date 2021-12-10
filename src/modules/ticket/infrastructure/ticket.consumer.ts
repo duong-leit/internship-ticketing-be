@@ -22,7 +22,7 @@ export class generateTicketConsumer {
       });
       this.eventService.updateAvailableTickets(job.data.eventId, 1);
     } catch (error) {
-      console.log('ticket consumer', {
+      console.log({
         status: error?.statusCode,
         message: error?.message,
       });

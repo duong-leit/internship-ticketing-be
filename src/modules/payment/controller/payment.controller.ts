@@ -22,7 +22,6 @@ export class PaymentController {
     @Query() query: { page: number }
   ) {
     const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    console.log(orderId);
     return await this.paymentService.getOrderDetails(
       userId,
       orderId,

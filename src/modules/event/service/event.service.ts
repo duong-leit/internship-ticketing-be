@@ -56,7 +56,6 @@ export class EventService {
     // };
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
-    //console.log(dataCheck);
 
     const [result, total] = await this.eventRepository.findAndCount({
       relations: relations?.arrayRelation || undefined,
@@ -68,9 +67,6 @@ export class EventService {
       take: take,
       skip: skip === 0 ? 0 : skip * take,
     });
-
-    //console.log(Object.getOwnPropertyNames(UserResponseDto));
-    console.log(result);
 
     return {
       statusCode: 200,
