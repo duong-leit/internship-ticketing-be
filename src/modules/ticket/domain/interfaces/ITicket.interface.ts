@@ -3,3 +3,8 @@ export interface ICreateTicket {
   amount: number;
   eventId: string;
 }
+export interface ITransferTicket {
+  orderId: string;
+  amount: number;
+  eventId: string;
+}
