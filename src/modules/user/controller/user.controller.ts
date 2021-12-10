@@ -9,62 +9,69 @@ import {
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import {
   CreateFacebookUserDto,
-  CreateSystemUserDto, GetListUserDto,
+  CreateSystemUserDto,
+  GetListUserDto,
   UserResponseDto,
 } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
 import { transferResponse } from '../../../common/utils/transferResponse';
-import {Response} from 'express';
+import { Response } from 'express';
 import { BankService } from '../service/bank.service';
-
+import { AuthService } from '../../auth/service/auth.service';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userServices: UserService,private bankService: BankService) {}
+  constructor(
+    private userServices: UserService,
+    private bankService: BankService,
+    // @Inject(forwardRef(()=>AuthService))
+    private readonly authService: AuthService
+  ) {}
 
   @Post('bank')
-  async createBank(@Res() res: Response){
+  async createBank(@Res() res: Response) {
     const response = await this.bankService.createBank();
-    transferResponse(res,response);
+    transferResponse(res, response);
   }
 
   @Get('/:bankId')
-  async getBankById(
-    @Query('bank ID') bankId: string,
-    @Res() res: Response
-  ){
-    const response = await this.bankService.getOneBank({id: bankId})
-    transferResponse(res,response);
+  async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
+    const response = await this.bankService.getOneBank({ id: bankId });
+    transferResponse(res, response);
   }
 
   @Post()
   @ApiBody({
-    type: GetListUserDto
+    type: GetListUserDto,
   })
   @ApiBadRequestResponse()
   async getUserPaging(
-    @Param() param: {id: string},
-    @Body() data: {
-      filter:{
-        [key: string]: string | number
-      },
+    @Param() param: { id: string },
+    @Body()
+    data: {
+      filter: {
+        [key: string]: string | number;
+      };
       pagination: {
-        pageSize: number, pageIndex: number
-      }
+        pageSize: number;
+        pageIndex: number;
+      };
     },
     @Res() res: Response
-  ){
+  ) {
     const filter = data.filter ?? data.filter;
-    const pagination = data.pagination ?? {pageSize: data.pagination?.pageSize,
-      pageIndex: data.pagination?.pageIndex}
+    const pagination = data.pagination ?? {
+      pageSize: data.pagination?.pageSize,
+      pageIndex: data.pagination?.pageIndex,
+    };
 
     const response = await this.userServices.getListUser(
-      {...filter},
-      {arrayRelation: ['role']},
-      {...pagination}
-    )
-    transferResponse(res, response)
+      { ...filter },
+      { arrayRelation: ['role'] },
+      { ...pagination }
+    );
+    transferResponse(res, response);
   }
 
   @Post('/register')
@@ -83,7 +90,7 @@ export class UserController {
   @ApiBody({ type: CreateSystemUserDto })
   async registerUser(
     @Body() userInfo: CreateSystemUserDto,
-    @Res () res: Response
+    @Res() res: Response
   ) {
     const response = await this.userServices.createSystemUser(userInfo);
     transferResponse(res, response);
@@ -98,9 +105,21 @@ export class UserController {
     description: 'Email is already used',
   })
   @ApiBody({ type: CreateFacebookUserDto })
-  registerFacebookUser(
-    @Body() userInfo: CreateFacebookUserDto
-  ): Promise<UserResponseDto> {
-    return this.userServices.createFacebookUser(userInfo);
+  async registerFacebookUser(
+    @Body() createFacebookUserDto: CreateFacebookUserDto,
+    @Res() res: Response
+  ) {
+    const userInfo = await this.authService.fetchFacebookInfo(
+      createFacebookUserDto.accessToken
+    );
+    if(userInfo.statusCode!==200){
+      transferResponse(res, userInfo);
+      return;
+    }
+    const response = await this.userServices.createFacebookUser(
+      createFacebookUserDto,
+      userInfo.data
+    );
+    transferResponse(res, response);
   }
 }

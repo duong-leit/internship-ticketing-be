@@ -1,19 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import {
-  CreateFacebookUserDto,
-  CreateSystemUserDto,
-  UserResponseDto,
-} from '../dto/user.dto';
+import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
-import { FacebookAuthService } from 'facebook-auth-nestjs';
 import { SALT_OR_ROUNDS } from 'src/common/constant';
-import { IFacebookData } from 'src/common/interface/common.interface';
 import { UserEntity } from '../domain/entities/user.entity';
 import { Like } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+
 
 @Injectable()
 export class UserService {
@@ -22,13 +18,14 @@ export class UserService {
     private readonly userRepository: UserRepository,
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository,
-    private readonly fbService: FacebookAuthService
-  ) {}
+    private readonly jwtService: JwtService,
+  ) {
+  }
 
   private static transferEntityToDto(
-    users: UserEntity[], ignore:{ [key: string]: boolean }  | undefined = undefined
+    users: UserEntity[],
+    ignore: { [key: string]: boolean } | undefined = undefined
   ) {
-
     return users.map((_user) => ({
       id: !ignore['id'] ? _user.id : undefined,
       createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
@@ -43,7 +40,7 @@ export class UserService {
       avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
       isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
       role: !ignore['role'] ? _user.role?.name : undefined,
-      roleId: !ignore['roleId'] ? _user.roleId : undefined
+      roleId: !ignore['roleId'] ? _user.roleId : undefined,
     }));
   }
 
@@ -60,21 +57,23 @@ export class UserService {
         isDeleted: false,
       },
     });
+    if (!user) return { statusCode: 404, message: 'Notfound' };
 
+    console.log(user);
     return {
       statusCode: 200,
-      data: UserService.transferEntityToDto([user], {roleId: true})[0],
+      data: UserService.transferEntityToDto([user], { roleId: true })[0],
     };
   }
 
   async getListUser(
     data: { [key: string]: string | number } | undefined = undefined,
-    relations: { arrayRelation: string[] } | undefined =  {
+    relations: { arrayRelation: string[] } | undefined = {
       arrayRelation: ['role'],
     },
     paging: { pageSize?: number; pageIndex: number | undefined } | undefined = {
       pageSize: 10,
-      pageIndex: 1
+      pageIndex: 1,
     }
   ) {
     const dataCheck = {
@@ -95,10 +94,9 @@ export class UserService {
 
     return {
       statusCode: 200,
-      data: UserService.transferEntityToDto(result,
-        {
+      data: UserService.transferEntityToDto(result, {
         roleId: true,
-        password: true
+        password: true,
       }),
       pagination: {
         _totalPage: Math.ceil(total / take),
@@ -109,13 +107,14 @@ export class UserService {
   }
 
   private async saveUser(newData: IUser) {
-    const user = await this.getOneUser({ email: newData.email });
-    if (user) return { statusCode: 400, message: 'Email is already taken' };
+    const result = await this.getOneUser({ email: newData.email });
+
+    if (result.statusCode!==404) return { statusCode: 400, message: 'Email is already taken' };
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
-    const result = await this.userRepository.save(newData);
-    if (!result) return { statusCode: 500, message: 'Server Error' };
+    const user = await this.userRepository.save(newData);
+    if (!user) return { statusCode: 500, message: 'Server Error' };
     return { statusCode: 200, message: 'Create successful' };
   }
 
@@ -132,34 +131,42 @@ export class UserService {
     return await this.saveUser(userInformation);
   }
 
-  async createFacebookUser(
-    userInfo: CreateFacebookUserDto
-  ): Promise<UserResponseDto> {
-    const userValue: IFacebookData = await this.fbService.getUser(
-      userInfo.accessToken,
-      'id',
-      'name',
-      'email',
-      'birthday'
-    );
-    if (!userValue) {
-      throw new BadRequestException('The token have been expired');
-    }
+  async createFacebookUser(createFacebookUserDto, userInfo) {
+    console.log(createFacebookUserDto, userInfo)
+    if (createFacebookUserDto.email !== userInfo.email)
+      return {
+        statusCode: 400,
+        message: 'Wrong email',
+      };
 
-    if (userInfo.data.email) {
-      userValue.email = userInfo.data.email;
-    }
-
-    const newUserInfo: IUser = {
-      name: userValue.name,
-      username: userValue.id,
-      email: userValue.email,
-      avatarUrl: userInfo.data.avatarUrl || null,
-      birthday: userValue.birthday || null,
+    const newUser: IUser = {
+      name: createFacebookUserDto.name,
+      username: userInfo.id,
+      email: userInfo.email,
+      avatarUrl: createFacebookUserDto.avatarUrl || null,
+      birthday: userInfo.birthday || null,
       isSocial: true,
     };
+    const result = await this.saveUser(newUser);
+    if(result.statusCode!==200)
+      return result
 
-    await this.saveUser(newUserInfo);
-    return { statusCode: 200 };
+    return {
+      statusCode: 200,
+      data: {
+        name: newUser.name,
+        email: newUser.email,
+        avatarUrl: newUser.avatarUrl
+      },
+      accessToken: this.generateJWTToken(newUser)
+    };
+  }
+  generateJWTToken(data: any): string {
+    const payload = {
+      sub: data.id || null,
+      email: data.email || null,
+      role: data.role?.name || null,
+    };
+    return this.jwtService.sign(payload);
   }
 }
