@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventService } from 'src/modules/event/service/event.service';
 import { TicketService } from 'src/modules/ticket/service/ticket.service';
+import { BankService } from 'src/modules/user/service/bank.service';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { OrderStatusEnum } from '../domain/enums/orderStatus.enum';
 import { IOrderDetail } from '../domain/interfaces/IOrderDetail.interface';
@@ -14,7 +15,8 @@ export class PaymentService {
     private readonly orderDetailRepository: OrderDetailRepository,
     @Inject(forwardRef(() => TicketService))
     private readonly ticketService: TicketService,
-    private readonly eventService: EventService
+    private readonly eventService: EventService,
+    private readonly bankService: BankService
   ) {}
 
   async getOrderList(
@@ -79,51 +81,57 @@ export class PaymentService {
   }
 
   async handleTicketPayment(data: {
-    buyerId: string;
+    userId: string;
     eventId: string;
     amount: number;
-    bank: any;
+    bank: {
+      name: string;
+      cardHolderName: string;
+      creditNumber: string;
+    };
   }) {
     try {
-      /**
-       * Input: buyerId, eventId, nOTicket, bankInfo
-       */
       const result = await this.validateCheckout(
-        data.buyerId,
+        data.userId,
         data.eventId,
         data.amount
       );
       if (result.status === true) {
         return { statusCode: 400, message: result.message };
       }
-      //get list of user's bank account by bankInfo; if not exists, create
-      //const {bankId} = await this.bankService.getBank(bankInfo);
-      //update availableTicket Event
-      //await this.eventService.increaseAvailableTicket(eventId,-amount)
 
+      let userBank: any = await this.bankService.getOneBank(data.bank);
+
+      if (!userBank.data) {
+        userBank = await this.bankService.createBank({
+          ...data.bank,
+          userId: data.userId,
+        });
+      }
+      //update availableTicket Event
       const newOrder = await this.createOrder({
         eventId: data.eventId,
-        buyerId: data.buyerId,
+        buyerId: data.userId,
         status: OrderStatusEnum.Done,
         orderDate: '2020-02-02',
         paymentDate: '2020-02-03',
-        bankId: '71eeb732-79ae-4d20-9764-63acb8ec96ce',
+        bankId: userBank.data.id,
         amount: data.amount,
       });
-      await this.ticketService.transferTicketOwner(
-        newOrder.id,
-        data.eventId,
-        data.amount
-      );
+      await this.ticketService.transferTicketOwner({
+        orderId: newOrder.id,
+        eventId: data.eventId,
+        amount: data.amount,
+      });
+
       return { statusCode: 200 };
     } catch (error) {
-      console.log('payment.service:', error.message);
+      console.log(error);
       return { statusCode: error.statusCode, message: error.message };
     }
   }
 
   async createOrder(data: { [field: string]: string | number }): Promise<any> {
-    console.log('data:', data);
     const orderList: OrderEntity = await this.orderRepository.save(data);
     return orderList;
   }
@@ -133,9 +141,6 @@ export class PaymentService {
   }
 
   async validateCheckout(buyerId: string, eventId: string, amount: number) {
-    //buyerId:string, eventId:string, amount:number
-
-    // validate: check availabie ticket < amount
     const event = await this.eventService.getEventByID(eventId);
     if (event.availableTickets < amount) {
       return { status: false, message: 'The number of ticket is invalid' };
@@ -148,6 +153,7 @@ export class PaymentService {
     });
     const totalAmount =
       orderList.reduce((total, element) => total + element.amount, 0) + amount;
+
     if (
       totalAmount > event.maxTicketOrder ||
       totalAmount < event.minTicketOrder
@@ -157,7 +163,6 @@ export class PaymentService {
         message: 'Number of ticket is less or more than the limit.',
       };
     }
-    // validate: check the info bank is not exists, if not: create new bank
     return { status: true };
   }
 }

@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { PaymentService } from '../service/payment.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { OrderRequestDto } from '../dto/payment.dto';
 
 @ApiTags('Payment')
 @Controller('payment')
@@ -15,6 +16,7 @@ export class PaymentController {
   }
 
   @Get('order/:orderId')
+  @ApiParam({ name: 'orderId', required: true })
   async getMyTicketByOrder(
     @Param('orderId') orderId: string,
     @Query() query: { page: number }
@@ -29,18 +31,22 @@ export class PaymentController {
   }
 
   @Post()
-  checkoutTickets() {
-    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
+  @ApiBody({ type: OrderRequestDto })
+  checkoutTickets(@Body() data: OrderRequestDto) {
+    /* const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
     const data = {
       eventId: '598c46aa-eb10-49c5-9dfa-965cffe14801',
       amount: 3,
       bank: {
-        creditCard: '123',
+        creditNumber: '123',
+        name: 'TPBank',
+        cardHolderName: 'Ha Anh Khoa',
       },
     };
+    */
     return this.paymentService.handleTicketPayment({
       ...data,
-      buyerId: userId,
+      // req.user.userId
     });
   }
 }

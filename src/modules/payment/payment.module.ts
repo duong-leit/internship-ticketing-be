@@ -6,12 +6,13 @@ import { OrderRepository } from './infrastructure/order.repository';
 import { PaymentService } from './service/payment.service';
 import { TicketModule } from '../ticket/ticket.module';
 import { EventModule } from '../event/event.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrderRepository, OrderDetailRepository]),
-    // TicketModule,
     EventModule,
+    UserModule,
     forwardRef(() => TicketModule),
   ],
   controllers: [PaymentController],
