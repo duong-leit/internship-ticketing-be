@@ -16,52 +16,116 @@ export class PaymentService {
     private readonly ticketService: TicketService,
     private readonly eventService: EventService
   ) {}
-  getHello(): string {
-    return 'Hello World!';
-  }
 
-  async handleTicketPayment() {
+  async getOrderList(
+    condition: { [field: string]: string | number },
+    relations: { arrayRelation: string[] } | undefined = {
+      arrayRelation: ['event'],
+    },
+    paging?: { take?: number; pageIndex?: number }
+  ) {
     try {
-      const buyerId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-      const eventId = '4fd369aa-75de-47d1-99ad-6e6cee11418e';
-      const amount = 3;
-      /**
-       * Input: buyerId, eventId, nOTicket, bankInfo
-       */
-      // this.validateCheckout();
-      //get list of user's bank account by bankInfo; if not exists, create
-      //update availableTicket Event
-      const newOrder = await this.createOrder({
-        eventId: eventId,
-        buyerId: buyerId,
-        status: OrderStatusEnum.Done,
-        orderDate: '2020-02-02',
-        paymentDate: '2020-02-03',
-        bankId: '71eeb732-79ae-4d20-9764-63acb8ec96ce',
-        amount: amount,
+      const orders = await this.orderRepository.find({
+        relations: relations?.arrayRelation || undefined,
+        where: condition,
+        take: paging.take,
+        skip: paging.pageIndex,
       });
-      await this.ticketService.transferTicketOwner(
-        newOrder.id,
-        eventId,
-        amount
-      );
-      console.log('transfer done.');
-      //  * transfer Ticket: {
-      //  * getTicketbyAmount
-      //  * create orderdetail
-      //  * deleteTicketList() array
-      //  * }
-      //  * return {statusCode, message}
+      return { statusCode: 200, data: { orders } };
     } catch (error) {
-      console.log('payment.service: line 50', error.message);
+      return { statusCode: error.statusCode, message: error.message };
+    }
+  }
+  async getMyTicketOrder(buyerId: string, pageIndex = 0) {
+    try {
+      const condition = {
+        buyerId: buyerId,
+      };
+      const paging = { take: 5, pageIndex: pageIndex };
+      const ticketOrderList = await this.getOrderList(
+        condition,
+        { arrayRelation: ['event'] },
+        paging
+      );
+
+      return { statusCode: 200, data: { OrderList: ticketOrderList } };
+    } catch (error) {
+      console.log(error);
+      return { statusCode: error.statusCode, message: error.message };
+    }
+  }
+  async getOrderDetails(userId: string, orderId: string, page?: number) {
+    try {
+      const order = await this.orderRepository.findOne({
+        where: { buyerId: userId },
+      });
+      if (order?.id != orderId) {
+        return {
+          statusCode: 400,
+          message: "User don't have permission on this order.",
+        };
+      }
+
+      const orderDetails = await this.orderDetailRepository.find({
+        where: { orderId },
+        take: 5,
+        skip: page ? (page - 1) * 5 : 0,
+      });
+
+      return { statusCode: 200, data: { orderDetails: orderDetails } };
+    } catch (error) {
       return { statusCode: error.statusCode, message: error.message };
     }
   }
 
-  async createOrder(data: {
-    [field: string]: string | number;
-  }): Promise<OrderEntity> {
-    return await this.orderRepository.save(data);
+  async handleTicketPayment(data: {
+    buyerId: string;
+    eventId: string;
+    amount: number;
+    bank: any;
+  }) {
+    try {
+      /**
+       * Input: buyerId, eventId, nOTicket, bankInfo
+       */
+      const result = await this.validateCheckout(
+        data.buyerId,
+        data.eventId,
+        data.amount
+      );
+      if (result.status === true) {
+        return { statusCode: 400, message: result.message };
+      }
+      //get list of user's bank account by bankInfo; if not exists, create
+      //const {bankId} = await this.bankService.getBank(bankInfo);
+      //update availableTicket Event
+      //await this.eventService.increaseAvailableTicket(eventId,-amount)
+
+      const newOrder = await this.createOrder({
+        eventId: data.eventId,
+        buyerId: data.buyerId,
+        status: OrderStatusEnum.Done,
+        orderDate: '2020-02-02',
+        paymentDate: '2020-02-03',
+        bankId: '71eeb732-79ae-4d20-9764-63acb8ec96ce',
+        amount: data.amount,
+      });
+      await this.ticketService.transferTicketOwner(
+        newOrder.id,
+        data.eventId,
+        data.amount
+      );
+      return { statusCode: 200 };
+    } catch (error) {
+      console.log('payment.service:', error.message);
+      return { statusCode: error.statusCode, message: error.message };
+    }
+  }
+
+  async createOrder(data: { [field: string]: string | number }): Promise<any> {
+    console.log('data:', data);
+    const orderList: OrderEntity = await this.orderRepository.save(data);
+    return orderList;
   }
 
   async createOrderDetail(data: IOrderDetail) {
@@ -71,13 +135,13 @@ export class PaymentService {
   async validateCheckout(buyerId: string, eventId: string, amount: number) {
     //buyerId:string, eventId:string, amount:number
 
-    /**
-     * validate: check availabie ticket < amount
-     * validate: check the total myticketsAtEvent purchased and amount to buy is over the limit
-     * validate: check the info bank is not exists, if not: create new bank
-     */
+    // validate: check availabie ticket < amount
     const event = await this.eventService.getEventByID(eventId);
-    if (event.availableTickets < amount) return false;
+    if (event.availableTickets < amount) {
+      return { status: false, message: 'The number of ticket is invalid' };
+    }
+
+    // validate: check the total myticketsAtEvent purchased and amount to buy is over the limit
     const orderList = await this.orderRepository.find({
       buyerId: buyerId,
       eventId: eventId,
@@ -88,8 +152,12 @@ export class PaymentService {
       totalAmount > event.maxTicketOrder ||
       totalAmount < event.minTicketOrder
     ) {
-      return false;
+      return {
+        status: false,
+        message: 'Number of ticket is less or more than the limit.',
+      };
     }
-    return true;
+    // validate: check the info bank is not exists, if not: create new bank
+    return { status: true };
   }
 }

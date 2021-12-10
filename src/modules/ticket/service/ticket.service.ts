@@ -10,7 +10,6 @@ import { TicketRepository } from '../infrastructure/ticket.repository';
 export class TicketService {
   constructor(
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
-    @InjectQueue('transfer-ticket-token') private transferTiket: Queue,
     private readonly ticketRepository: TicketRepository,
     @Inject(forwardRef(() => PaymentService))
     private readonly paymentService: PaymentService
@@ -25,7 +24,7 @@ export class TicketService {
     const data = {
       userId: 'ec6b5e5a-bddf-4c8f-88bc-661597070e8a',
       amount: 10,
-      eventId: '4fd369aa-75de-47d1-99ad-6e6cee11418e',
+      eventId: '598c46aa-eb10-49c5-9dfa-965cffe14801',
     };
     for (let count = 0; count < data.amount; count++) {
       await this.generateTiket.add('generate', {
@@ -36,7 +35,7 @@ export class TicketService {
     }
   }
 
-  async getTickets(
+  async getTicketList(
     condition: { [field: string]: string },
     takeNumber?: number,
     page?: number
@@ -59,7 +58,7 @@ export class TicketService {
   }
 
   async transferTicketOwner(orderId: string, eventId: string, amount: number) {
-    const ticketList = await this.getTickets(
+    const ticketList = await this.getTicketList(
       { eventId: eventId, status: TicketStatusEnum.Ready },
       amount
     );
