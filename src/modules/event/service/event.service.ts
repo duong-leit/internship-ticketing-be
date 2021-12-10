@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
+import { EventEntity } from '../domain/entities/event.entity';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { EventRepository } from '../infrastructure/event.repository';
 
@@ -11,22 +12,43 @@ export class EventService {
     private readonly eventRepository: EventRepository
   ) {}
 
+  private transferEntityToDto(
+    event: EventEntity[], ignore:{ [key: string]: boolean }  | undefined = undefined
+  ) {
+    return event.map((_user) => ({
+      // id: !ignore['id'] ? _user.id : undefined,
+      // createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
+      // updatedAt: !ignore['name'] ? _user.name : undefined,
+      // name: !ignore['name'] ? _user.name : undefined,
+      // email: !!ignore['email'] ? _user.email : undefined,
+      // username: !ignore['username'] ? _user.username : undefined,
+      // birthday: !ignore['birthday'] ? _user.birthday : undefined,
+      // numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
+      // password: !ignore['password'] ? _user.password : undefined,
+      // gender: !ignore['gender'] ? _user.gender : undefined,
+      // avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
+      // isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
+      // role: !ignore['role'] ? _user.role?.name : undefined,
+      // roleId: !ignore['roleId'] ? _user.roleId : undefined
+    }));
+  }
+
   async getEventByID(eventId: string){
     return await this.eventRepository.findOne({
       where: {id: eventId}})
   }
 
   async getEventByCreator(
-    data: { [key: string]: string | number } | undefined = undefined,
+    data: string,
     relations: { arrayRelation: string[] } | undefined = undefined,
     paging: { pageSize: number; pageIndex: number } | undefined = {
-      pageSize: undefined,
-      pageIndex: undefined
+      pageSize: 10,
+      pageIndex: 1
     }
   ) {
-    const dataCheck = {
-      [Object.keys(data)[0]]: data[Object.keys(data)[0]],
-    };
+    // const dataCheck = {
+    //   [Object.keys(data)[0]]: data[Object.keys(data)[0]],
+    // };
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
     //console.log(dataCheck);
@@ -83,9 +105,31 @@ export class EventService {
     try {
       const newEvent = this.eventRepository.create(eventInfo);
       const event = await this.eventRepository.save(newEvent);
-      return this.responeSuccessMessage(200, "Event created successfully", {id: event.id})
+      return this.responeSuccessMessage(201, "Event created successfully", {id: event.id})
     } catch (error) {
       return this.responeErrorMessage(400, "Cannot create new event", )
+    }
+  }
+
+  async updateAvailableTickets(eventId: string, ticketAmount: number): Promise<EventResponeDto>{
+    try {
+      const event = await this.getEventByID(eventId);
+      if(!event){
+        return this.responeErrorMessage(404, "Cannot find the event")
+      }  
+      if (event.availableTickets < (-ticketAmount)){
+        return this.responeErrorMessage(400, "Not enough tickets")
+      }
+      const availableTickets = event.availableTickets + ticketAmount;
+      this.eventRepository.save(
+        {
+          ...event,
+          availableTickets: availableTickets
+        }
+      )
+      return this.responeSuccessMessage(201, "AvailableTickets updated sucessfully",{availableTickets: availableTickets})
+    } catch (error) {
+      return this.responeErrorMessage(500, "Cannot update available tickets");
     }
   }
 
@@ -100,7 +144,7 @@ export class EventService {
         ...event, //existed Info
         ...eventInfo //Update Info
       })
-      return this.responeSuccessMessage(200, "  Event updated successfully", {id: event.id})
+      return this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
     } catch (error) {
       //console.log(error);
       return this.responeErrorMessage(400, "Cannot update event");
