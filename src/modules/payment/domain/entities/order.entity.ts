@@ -27,7 +27,7 @@ export class OrderEntity extends AppBaseEntity {
   @Column({ type: 'uuid', name: 'buyerId' })
   buyerId: string;
 
-  @Column({ type: 'uuid', name: 'bankId' })
+  @Column({ type: 'uuid', name: 'eventId' })
   eventId: string;
 
   @Column({ type: 'uuid', name: 'bankId' })
