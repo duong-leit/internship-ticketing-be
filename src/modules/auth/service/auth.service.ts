@@ -18,42 +18,70 @@ export class AuthService {
   ) {}
 
   async systemLogin(data: UserLoginDto) {
-    const user = await this.userService.getOneUser({ username: data.username });
-    if (!user || !bcrypt.compareSync(data.password, user.data.password))
+    const result = await this.userService.getOneUser({
+      username: data.username,
+    });
+    if (
+      result.statusCode === 404 ||
+      !bcrypt.compareSync(data.password, result.data.password)
+    )
       return { statusCode: 400, message: 'Wrong username or password' };
     return {
       statusCode: 200,
       data: {
-        name: user.data.name,
-        avatarUrl: user.data.avatarUrl,
+        name: result.data.name,
+        avatarUrl: result.data.avatarUrl,
       },
-      accessToken: this.generateJWTToken(user),
+      accessToken: this.generateJWTToken(result.data),
     };
   }
 
-  async facebookLogin({
-    avatarUrl,
-    accessToken,
-  }: FacebookLoginDto) {
-    const userInformation: IFacebookData = await this.fbService.getUser(
+  async fetchFacebookInfo(accessToken: string) {
+    try {
+      const userInfo = await this.fbService.getUser(
+        accessToken,
+        'id',
+        'name',
+        'email',
+        'birthday'
+      );
+      return {
+        statusCode: 200,
+        data: {
+          id: userInfo.id,
+          email: userInfo.email,
+          name: userInfo.name,
+          birthday: userInfo.birthday,
+        },
+      };
+    }catch{
+      return {
+        statusCode: 400,
+        message: 'Token Error',
+      };
+    }
+  }
+
+  async facebookLogin({ avatarUrl, accessToken }: FacebookLoginDto) {
+    const userInfo: IFacebookData = await this.fbService.getUser(
       accessToken,
       'id',
       'name',
       'email',
       'birthday'
     );
-    if (!userInformation)
+    if (!userInfo)
       return { statusCode: 400, message: 'The token have been expired' };
 
-    const user = await this.userService.getOneUser({
-      username: userInformation.id,
+    const result = await this.userService.getOneUser({
+      username: userInfo.id,
     });
-    if (!user) {
+    if (result.statusCode === 404) {
       return {
         statusCode: 401,
         data: {
-          name: userInformation.name,
-          email: userInformation.email ? userInformation.email : null,
+          name: userInfo.name,
+          email: userInfo.email ? userInfo.email : null,
           avatarUrl: avatarUrl,
         },
         accessToken: accessToken,
@@ -63,14 +91,14 @@ export class AuthService {
     return {
       statusCode: 200,
       data: {
-        name: user.data.name,
+        name: result.data.name,
         avatarUrl: avatarUrl,
       },
-      accessToken: this.generateJWTToken(user),
+      accessToken: this.generateJWTToken(result.data),
     };
   }
 
-  private generateJWTToken(data: any): string {
+  generateJWTToken(data: any): string {
     const payload = {
       sub: data.id || null,
       email: data.email || null,
