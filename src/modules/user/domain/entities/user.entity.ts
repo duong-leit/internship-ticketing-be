@@ -31,13 +31,13 @@ export class UserEntity extends AppBaseEntity {
   birthday: string | null;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
-  numberPhone: string | null;
+  phoneNumber: string | null;
 
   @Column({ type: 'enum', enum: GenderEnum, default: GenderEnum.Other })
   gender: GenderEnum;
 
   @Column({ type: 'text', nullable: true })
-  avatar: string | null;
+  avatarUrl: string | null;
 
   @Column({ type: 'boolean', default: 0 })
   isSocial: boolean;

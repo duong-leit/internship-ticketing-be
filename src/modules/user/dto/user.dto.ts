@@ -3,37 +3,57 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
 import { GenderEnum } from '../domain/enums/gender.enum';
 
-class FacebookDataDto {
-  @Length(1)
-  @ApiProperty()
-  @IsString()
-  username: string;
+// class FacebookDataDto {
+//   @Length(1)
+//   @ApiProperty()
+//   @IsString()
+//   username: string;
+//
+//   @Length(1, 255)
+//   @ApiProperty()
+//   @IsString()
+//   email: string;
+//
+//   @Length(1)
+//   @ApiProperty()
+//   @IsString()
+//   name: string;
+//
+//   @Length(1)
+//   @ApiProperty()
+//   @IsOptional()
+//   birthday?: string;
+//
+//   @ApiProperty()
+//   @IsString()
+//   avatarUrl?: string;
+// }
 
-  @Length(1, 255)
+export class filterDto {
   @ApiProperty()
-  @IsString()
-  email: string;
+  key: string | number;
+}
 
-  @Length(1)
+export class paginationDto {
   @ApiProperty()
-  @IsString()
-  name: string;
-
-  @Length(1)
-  @ApiProperty()
-  @IsOptional()
-  birthday?: string;
+  pageSize: number;
 
   @ApiProperty()
-  @IsString()
-  avatarUrl?: string;
+  pageIndex: number;
+}
+
+export class GetListUserDto {
+  @ApiProperty({ type: filterDto })
+  filter: filterDto;
+
+  @ApiProperty({ type: paginationDto })
+  pagination: paginationDto;
 }
 
 export class CreateSystemUserDto {
@@ -56,13 +76,21 @@ export class CreateSystemUserDto {
 }
 
 export class CreateFacebookUserDto {
-  @IsNotEmpty()
-  @IsObject({ each: true })
   @ApiProperty()
-  data: FacebookDataDto;
+  @IsNotEmpty()
+  accessToken: string;
 
   @ApiProperty()
-  accessToken: string;
+  @IsOptional()
+  avatarUrl?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  name: string;
 }
 
 export class CreateUserResponseDto {
@@ -92,11 +120,11 @@ export class UserResponseDto {
   @IsOptional()
   gender?: GenderEnum;
 
-  @ApiProperty()
-  @IsOptional()
-  phoneNumber?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  avatar?: string;
+  // @ApiProperty()
+  // @IsOptional()
+  // phoneNumber?: string;
+  //
+  // @ApiProperty()
+  // @IsOptional()
+  // avatar?: string;
 }

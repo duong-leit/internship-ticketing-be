@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './controller/auth.controller';
@@ -14,11 +14,13 @@ import {
   controllers: [AuthController],
   imports: [
     FacebookAuthModule.forRootAsync(facebookAuthModuleOption),
-    UserModule,
+    forwardRef(()=>UserModule),
+
     RoleModule,
     JwtModule.registerAsync(jwtModuleOption),
     RoleModule,
   ],
   providers: [AuthService],
+  exports: [AuthService]
 })
 export class AuthModule {}

@@ -6,7 +6,7 @@ import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: false })
   name: string;
 
   @Column({ type: 'text', nullable: true })
@@ -21,19 +21,19 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   eventPlacename: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   eventAddress: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: false })
   saleStartDate: string;
 
   @Column({ type: 'date', nullable: true })
   saleEndDate: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: false })
   eventStartDate: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ type: 'date', nullable: false })
   eventEndDate: string;
 
   @Column({ type: 'int', default: 1, nullable: true })
@@ -48,10 +48,10 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'decimal', nullable: true })
   ticketPrice: number;
 
-  @Column({ type: 'int', default: 1, nullable: true })
+  @Column({ type: 'int', default: 1, nullable: false })
   maxTicketOrder: number;
 
-  @Column({ type: 'int', default: 1, nullable: true })
+  @Column({ type: 'int', default: 1, nullable: false })
   minTicketOrder: number;
 
   @Column({ type: 'text', nullable: true })
@@ -72,7 +72,7 @@ export class EventEntity extends AppBaseEntity {
   @Column({
     type: 'enum',
     enum: EventStatusEnum,
-    default: EventStatusEnum.Pending,
+    default: EventStatusEnum.Ready,
   })
   status: EventStatusEnum;
 

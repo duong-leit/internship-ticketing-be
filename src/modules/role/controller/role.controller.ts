@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiTags } from '@nestjs/swagger';
 import { RoleService } from '../service/role.service';
 import { PermissionRequestDto, RolePermissionRequestDto, RoleRequestDto } from '../dto/role.dto';
+import { transferResponse } from '../../../common/utils/transferResponse';
+import { Response } from 'express';
 
 @ApiTags('Role and Permission')
 @Controller('')
@@ -10,8 +12,11 @@ export class RoleController {
   }
 
   @Get()
-  getAllRolePermission(){
-    return this.roleService.getAllRolePermission();
+  async getAllRolePermission(
+    @Res() res: Response
+  ){
+    const response = await this.roleService.getAllRolePermission();
+    transferResponse(res, response);
   }
 
   @Post('/role')
