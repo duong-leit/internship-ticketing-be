@@ -108,13 +108,18 @@ export class PaymentService {
           userId: data.userId,
         });
       }
+      const event = await this.eventService.getEventByID(data.eventId);
+      if (!event) return { statusCode: 400, message: 'Event is not found.' };
+
+      // const newAvailableTickets = event.availableTickets - data.amount;
+      await this.eventService.updateAvailableTickets(event.id, data.amount);
       //update availableTicket Event
       const newOrder = await this.createOrder({
         eventId: data.eventId,
         buyerId: data.userId,
         status: OrderStatusEnum.Done,
-        orderDate: '2020-02-02',
-        paymentDate: '2020-02-03',
+        orderDate: Date(),
+        paymentDate: Date(), //'2020-02-03',
         bankId: userBank.data.id,
         amount: data.amount,
       });

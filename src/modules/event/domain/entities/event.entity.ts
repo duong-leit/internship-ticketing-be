@@ -39,7 +39,7 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'int', default: 1, nullable: true })
   totalTickets: number;
 
-  @Column({ type: 'int', default: 1, nullable: true })
+  @Column({ type: 'int', default: 0, nullable: true })
   availableTickets: number;
 
   @Column({ type: 'text', nullable: true })

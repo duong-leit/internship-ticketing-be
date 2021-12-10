@@ -7,11 +7,13 @@ import { BullModule } from '@nestjs/bull';
 import { generateTicketConsumer } from './infrastructure/ticket.consumer';
 import processor from './infrastructure/ticket.processor';
 import { PaymentModule } from '../payment/payment.module';
+import { EventModule } from '../event/event.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TicketRepository]),
     forwardRef(() => PaymentModule),
+    forwardRef(() => EventModule),
     BullModule.forRootAsync({
       useFactory: () => ({
         redis: {

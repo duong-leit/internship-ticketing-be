@@ -29,13 +29,16 @@ export class TicketService {
     //   amount: 10,
     //   eventId: '598c46aa-eb10-49c5-9dfa-965cffe14801',
     // };
+    console.log('hello createTicket', data);
     for (let count = 0; count < data.amount; count++) {
       await this.generateTiket.add('generate', {
         eventId: data.eventId,
         sellerId: data.userId,
         id: (Math.random() * 1000000).toString(), // fake token
       });
+      console.log('hello createTicket');
     }
+    console.log('hello createTicket end');
   }
 
   async getTicketList(
