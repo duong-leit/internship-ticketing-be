@@ -9,32 +9,32 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'text', nullable: false})
   name: string;
 
-  @Column({ type: 'text', nullable: false })
-  logoUrl: string;
+  @Column({ type: 'text', nullable: true })
+  logoUrl?: string;
 
-  @Column({ type: 'text', nullable: false })
-  bannerUrl: string;
+  @Column({ type: 'text', nullable: true })
+  bannerUrl?: string;
 
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   eventPlacename: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: false })
   eventAddress: string;
 
   @Column({ type: 'date', nullable: false })
-  saleStartDay: string;
+  saleStartDate: string;
 
   @Column({ type: 'date', nullable: false })
   saleEndDate: string;
 
   @Column({ type: 'date', nullable: false })
-  eventStartDay: string;
+  eventStartDate: string;
 
   @Column({ type: 'date', nullable: false })
-  eventEndDay: string;
+  eventEndDate: string;
 
   @Column({ type: 'int', default: 1, nullable: false })
   totalTickets: number;
@@ -42,16 +42,16 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'int', default: 1, nullable: false })
   availableTickets: number;
 
-  @Column({ type: 'text', nullable: false })
-  ticketImageUrl: string;
+  @Column({ type: 'text', nullable: true })
+  ticketImageUrl?: string;
 
   @Column({ type: 'decimal', nullable: false })
   ticketPrice: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', default: 1, nullable: false })
   maxTicketOrder: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', default: 1, nullable: false })
   minTicketOrder: number;
 
   @Column({ type: 'text', nullable: true })
@@ -60,16 +60,16 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 321, nullable: true })
   organizationEmail: string | null;
 
-  @Column({ type: 'varchar', length: 11, nullable: false })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   organizationPhone: string | null;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   organizationAddress: string | null;
 
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Ready })
+  @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Pending })
   status: EventStatusEnum;
 
   @Column({type: 'uuid', name: 'categoryId'})
