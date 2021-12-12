@@ -1,8 +1,7 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TicketService } from 'src/modules/ticket/service/ticket.service';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
-import { EventEntity } from '../domain/entities/event.entity';
+// import { EventEntity } from '../domain/entities/event.entity';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { EventRepository } from '../infrastructure/event.repository';
 
@@ -10,9 +9,7 @@ import { EventRepository } from '../infrastructure/event.repository';
 export class EventService {
   constructor(
     @InjectRepository(EventRepository)
-    private readonly eventRepository: EventRepository,
-    @Inject(forwardRef(() => TicketService))
-    private readonly ticketService: TicketService
+    private readonly eventRepository: EventRepository // @Inject(forwardRef(() => TicketService)) // private readonly ticketService: TicketService
   ) {}
 
   // private transferEntityToDto(
@@ -113,11 +110,11 @@ export class EventService {
     try {
       const newEvent = this.eventRepository.create(eventInfo);
       const event = await this.eventRepository.save(newEvent);
-      await this.ticketService.createTicketsByEvent({
-        userId: eventInfo.userId,
-        amount: eventInfo.totalTickets,
-        eventId: event.id,
-      });
+      // await this.ticketService.createTicketsByEvent({
+      //   userId: eventInfo.userId,
+      //   amount: eventInfo.totalTickets,
+      //   eventId: event.id,
+      // });
       return this.responeSuccessMessage(201, 'Event created successfully', {
         id: event.id,
       });

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsObject, IsString, Min } from 'class-validator';
 import { BankRequestDto } from 'src/modules/user/dto/bank.dto';
-import { OrderStatusEnum } from '../domain/enums/orderStatus.enum';
+import { OrderStatusEnum } from '../../order/domain/enums/orderStatus.enum';
 
 export class OrderResponseDto {
   status?: OrderStatusEnum;

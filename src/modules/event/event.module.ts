@@ -4,11 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EventRepository } from './infrastructure/event.repository';
 import { EventCategoryRepository } from './infrastructure/eventCategory.repository';
 import { EventService } from './service/event.service';
-import { TicketModule } from '../ticket/ticket.module';
+import { OrderModule } from '../order/order.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([EventRepository, EventCategoryRepository]),
-    forwardRef(() => TicketModule),
+    forwardRef(() => OrderModule),
   ],
   controllers: [EventController],
   providers: [EventService],

@@ -1,7 +1,7 @@
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { OrderEntity } from '../../../payment/domain/entities/order.entity';
+import { OrderEntity } from '../../../order/domain/entities/order.entity';
 
 @Entity('Bank')
 export class BankEntity extends AppBaseEntity {

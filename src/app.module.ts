@@ -6,7 +6,7 @@ import configuration, {
   typeormModuleOption,
 } from './configs/configuration';
 import { UserModule } from './modules/user/user.module';
-import { TicketModule } from './modules/ticket/ticket.module';
+import { OrderModule } from './modules/order/order.module';
 import { RoleModule } from './modules/role/role.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { EventModule } from './modules/event/event.module';
@@ -23,7 +23,7 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
     TypeOrmModule.forRootAsync(typeormModuleOption),
     GoogleRecaptchaModule.forRootAsync(googleRecaptchaModuleOption),
     UserModule,
-    TicketModule,
+    OrderModule,
     RoleModule,
     PaymentModule,
     EventModule,

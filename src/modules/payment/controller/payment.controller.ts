@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { PaymentService } from '../service/payment.service';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { OrderRequestDto } from '../dto/payment.dto';
 
 @ApiTags('Payment')
@@ -8,26 +8,26 @@ import { OrderRequestDto } from '../dto/payment.dto';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Get('/order')
-  async getMyOrder() {
-    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    const page = 0;
-    return this.paymentService.getMyTicketOrder(userId, page);
-  }
+  // @Get('/order')
+  // async getMyOrder() {
+  //   const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
+  //   const page = 0;
+  //   return this.paymentService.getMyTicketOrder(userId, page);
+  // }
 
-  @Get('order/:orderId')
-  @ApiParam({ name: 'orderId', required: true })
-  async getMyTicketByOrder(
-    @Param('orderId') orderId: string,
-    @Query() query: { page: number }
-  ) {
-    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    return await this.paymentService.getOrderDetails(
-      userId,
-      orderId,
-      query.page
-    );
-  }
+  // @Get('order/:orderId')
+  // @ApiParam({ name: 'orderId', required: true })
+  // async getMyTicketByOrder(
+  //   @Param('orderId') orderId: string,
+  //   @Query() query: { page: number }
+  // ) {
+  //   const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
+  //   return await this.paymentService.getOrderDetails(
+  //     userId,
+  //     orderId,
+  //     query.page
+  //   );
+  // }
 
   @Post()
   @ApiBody({ type: OrderRequestDto })
@@ -43,7 +43,7 @@ export class PaymentController {
       },
     };
     */
-    return this.paymentService.handleTicketPayment({
+    return this.paymentService.handleCheckout({
       ...data,
       // req.user.userId
     });

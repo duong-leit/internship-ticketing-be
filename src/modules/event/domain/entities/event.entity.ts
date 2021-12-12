@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { EventStatusEnum } from '../enums/eventStatus.enum';
 import { AppBaseEntity } from 'src/common/entities/entity';
-import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
+import { OrderEntity } from 'src/modules/order/domain/entities/order.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
