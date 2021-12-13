@@ -31,7 +31,16 @@ export class UserController {
 
   @Post('bank')
   async createBank(@Res() res: Response) {
-    const response = await this.bankService.createBank();
+    const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
+    const dataInput = {
+      name: 'Viettinbank',
+      cardHolderName: 'Ha Anh Khoa',
+      creditNumber: '1231 2312 3213',
+    };
+    const response = await this.bankService.createBank({
+      userId,
+      ...dataInput,
+    });
     transferResponse(res, response);
   }
 
@@ -112,7 +121,7 @@ export class UserController {
     const userInfo = await this.authService.fetchFacebookInfo(
       createFacebookUserDto.accessToken
     );
-    if(userInfo.statusCode!==200){
+    if (userInfo.statusCode !== 200) {
       transferResponse(res, userInfo);
       return;
     }

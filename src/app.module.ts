@@ -12,6 +12,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { EventModule } from './modules/event/event.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
+// import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [

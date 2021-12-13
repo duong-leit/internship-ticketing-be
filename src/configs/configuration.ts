@@ -2,7 +2,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ACTION_RECAPTCHA, SCORE_RECAPTCHA } from 'src/common/constant';
 
-
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   database: {
@@ -68,7 +67,6 @@ export const facebookAuthModuleOption = {
 export const jwtModuleOption = {
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => {
-    console.log(configService);
     return {
       secret: configService.get<string>('jwtSecretKey'),
       signOptions: { expiresIn: '7d' },

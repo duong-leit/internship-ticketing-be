@@ -1,8 +1,7 @@
 import { AppBaseEntity } from 'src/common/entities/entity';
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { OrderEntity } from '../../../payment/domain/entities/order.entity';
-
 
 @Entity('Bank')
 export class BankEntity extends AppBaseEntity {
@@ -15,15 +14,13 @@ export class BankEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 20, nullable: false })
   creditNumber!: string;
 
-  @Column({type: 'uuid', name:'userId'})
+  @Column({ type: 'uuid', name: 'userId' })
   userId: string;
 
-  @OneToOne(() => UserEntity)
-  @JoinColumn({name: 'userId'})
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.id)
+  @JoinColumn({ name: 'userId' })
   user!: UserEntity;
 
-  @OneToMany(
-    () => OrderEntity,
-    (order: OrderEntity) => order.id)
+  @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)
   order!: OrderEntity[];
 }

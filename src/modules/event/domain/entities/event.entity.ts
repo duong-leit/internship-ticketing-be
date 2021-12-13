@@ -27,7 +27,7 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'date', nullable: false })
   saleStartDate: string;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   saleEndDate: string;
 
   @Column({ type: 'date', nullable: false })
@@ -36,16 +36,16 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'date', nullable: false })
   eventEndDate: string;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   totalTickets: number;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 0, nullable: true })
   availableTickets: number;
 
   @Column({ type: 'text', nullable: true })
   ticketImageUrl?: string;
 
-  @Column({ type: 'decimal', nullable: false })
+  @Column({ type: 'decimal', nullable: true })
   ticketPrice: number;
 
   @Column({ type: 'int', default: 1, nullable: false })
