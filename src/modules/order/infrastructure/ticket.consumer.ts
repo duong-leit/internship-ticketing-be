@@ -16,14 +16,17 @@ export class generateTicketConsumer {
     try {
       // call tatum => token
       // add token to wallet seller
+      console.log('generate: ', {
+        orderId: job.data.orderId,
+        nftToken: String(job.data.id),
+      });
       await this.orderDetailRepository.insert({
         orderId: job.data.orderId,
-        nftToken: job.data.id.toString(),
+        nftToken: String(job.data.id),
       });
     } catch (error) {
       console.log({
-        status: error?.statusCode,
-        message: error?.message,
+        status: error,
       });
     }
   }

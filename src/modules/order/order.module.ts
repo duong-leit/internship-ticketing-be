@@ -23,7 +23,7 @@ import { OrderDetailRepository } from './infrastructure/repositories/orderDetail
         },
         limiter: {
           max: 5,
-          duration: 1000,
+          duration: 5000,
           bounceBack: false,
         },
       }),

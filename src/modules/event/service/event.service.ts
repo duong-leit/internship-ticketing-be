@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
+import { QueryRunner } from 'typeorm';
+import { EventEntity } from '../domain/entities/event.entity';
 // import { EventEntity } from '../domain/entities/event.entity';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { EventRepository } from '../infrastructure/event.repository';
@@ -34,7 +36,13 @@ export class EventService {
   //   }));
   // }
 
-  async getEventByID(eventId: string) {
+  async getEventByID(
+    eventId: string,
+    queryRunner: QueryRunner = null
+  ): Promise<EventEntity> {
+    if (queryRunner !== null) {
+      return await queryRunner.manager.findOne('event', eventId);
+    }
     return await this.eventRepository.findOne({
       where: { id: eventId },
     });
@@ -125,28 +133,30 @@ export class EventService {
 
   async updateAvailableTickets(
     eventId: string,
-    ticketAmount: number
-  ): Promise<EventResponeDto> {
+    ticketAmount: number,
+    queryRunner: QueryRunner = undefined
+  ): Promise<EventEntity> {
     try {
       const event = await this.getEventByID(eventId);
       if (!event) {
-        return this.responeErrorMessage(404, 'Cannot find the event');
+        return null;
       }
       if (event.availableTickets < -ticketAmount) {
-        return this.responeErrorMessage(400, 'Not enough tickets');
+        return null;
       }
       const availableTickets = event.availableTickets + ticketAmount;
-      this.eventRepository.save({
+      if (queryRunner) {
+        return queryRunner.manager.save(EventEntity, {
+          ...event,
+          availableTickets: availableTickets,
+        });
+      }
+      return this.eventRepository.save({
         ...event,
         availableTickets: availableTickets,
       });
-      return this.responeSuccessMessage(
-        201,
-        'AvailableTickets updated sucessfully',
-        { availableTickets: availableTickets }
-      );
     } catch (error) {
-      return this.responeErrorMessage(500, 'Cannot update available tickets');
+      return null;
     }
   }
 

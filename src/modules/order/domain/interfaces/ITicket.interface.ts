@@ -1,5 +1,5 @@
 export interface ICreateOrderDetails {
-  userId: string;
+  // userId: string;
   amount: number;
   orderId: string;
 }

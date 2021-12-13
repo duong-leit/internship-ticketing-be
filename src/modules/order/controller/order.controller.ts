@@ -1,6 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { OrderService } from '../service/order.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('order')
 @Controller('order')
@@ -9,12 +9,30 @@ export class OrderController {
 
   //get all order
   @Get()
-  async getOrders(): Promise<string> {
-    return await this.orderService.getHello();
+  async getOrders() {
+    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
+    const page = 0;
+    const take = 5;
+    return this.orderService.getOrders({ buyerId: userId }, ['event'], {
+      take,
+      pageIndex: page,
+    });
   }
+
   //get detail order
-  @Get(':id')
-  async getOrderDetails(): Promise<string> {
-    return await this.orderService.getHello();
+  @Get(':orderId')
+  @ApiParam({ name: 'orderId', required: true })
+  async getOrderDetails(
+    @Param('orderId') orderId: string,
+    @Query() query = { take: 5, page: 0 }
+  ) {
+    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
+    // const take = 5;
+    return await this.orderService.getOrderDetails(
+      userId,
+      orderId,
+      query.take,
+      query.page
+    );
   }
 }

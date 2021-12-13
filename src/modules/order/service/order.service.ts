@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 import { EventService } from 'src/modules/event/service/event.service';
-// import { PaymentService } from 'src/modules/payment/service/payment.service';
+import { QueryRunner } from 'typeorm';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { ICreateOrderDetails } from '../domain/interfaces/ITicket.interface';
 import { OrderRepository } from '../infrastructure/repositories/order.repository';
@@ -13,25 +13,23 @@ export class OrderService {
   constructor(
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
     private readonly orderRepository: OrderRepository,
-    private readonly eventService: EventService // @Inject(forwardRef(() => PaymentService)) // private readonly paymentService: PaymentService
+    private readonly eventService: EventService
   ) {}
   async getHello(): Promise<string> {
     return 'Hello World!';
   }
 
   async getOrders(
-    condition: { [field: string]: string | number },
-    relations: { arrayRelation: string[] } | undefined = {
-      arrayRelation: ['event'],
-    },
+    condition?: { [field: string]: string | number },
+    relations: string[] | undefined = ['event'],
     paging?: { take?: number; pageIndex?: number }
   ) {
     try {
       const orders = await this.orderRepository.find({
-        relations: relations?.arrayRelation || undefined,
+        relations: relations || undefined,
         where: condition,
         take: paging.take,
-        skip: paging.pageIndex,
+        skip: paging.pageIndex ? (paging.pageIndex - 1) * 5 : 0,
       });
       return { statusCode: 200, data: { orders } };
     } catch (error) {
@@ -39,7 +37,12 @@ export class OrderService {
     }
   }
 
-  async getOrderDetails(userId: string, orderId: string, page?: number) {
+  async getOrderDetails(
+    userId: string,
+    orderId: string,
+    take = 5,
+    page?: number
+  ) {
     try {
       const order = await this.orderRepository.findOne({
         where: { buyerId: userId },
@@ -53,7 +56,7 @@ export class OrderService {
 
       const orderDetails = await this.orderDetailRepository.find({
         where: { orderId },
-        take: 5,
+        take: take,
         skip: page ? (page - 1) * 5 : 0,
       });
 
@@ -63,26 +66,44 @@ export class OrderService {
     }
   }
 
-  async createOrder(data: { [field: string]: string | number }): Promise<any> {
-    //update available ticket event
-    // await this.eventService.updateAvailableTickets(event.id, data.amount);
-    const orderList: OrderEntity = await this.orderRepository.save(data);
-    return orderList;
+  async createOrder(
+    data: { [field: string]: string | number },
+    queryRunner: QueryRunner
+  ): Promise<OrderEntity> {
+    try {
+      const updatedEvent = await this.eventService.updateAvailableTickets(
+        String(data.eventId),
+        -Number(data.amount),
+        queryRunner
+      );
+      if (!updatedEvent) {
+        queryRunner.rollbackTransaction();
+        throw new Error('invalid available ticket');
+      }
+
+      const order = await queryRunner.manager.save(OrderEntity, data);
+      this.createOrderDetails({
+        amount: Number(data.amount),
+        orderId: String(order.id),
+      });
+      return order;
+    } catch (error) {
+      queryRunner.rollbackTransaction();
+      throw new Error('cannot create new order.');
+    }
   }
 
   async createOrderDetails(data: ICreateOrderDetails): Promise<void> {
+    //IOrderDetail
     for (let count = 0; count < data.amount; count++) {
+      console.log(data);
       await this.generateTiket.add('generate', {
         orderId: data.orderId,
-        sellerId: data.userId,
-        id: (Math.random() * 1000000).toString(), // fake token
+        id: (Math.random() * Math.random() * 1000000).toString(), // fake token
       });
     }
   }
 
-  // async createOrderDetail(data: IOrderDetail) {
-  //   return await this.orderDetailRepository.insert(data);
-  // }
   async validateNewOrder(buyerId: string, eventId: string, amount: number) {
     const event = await this.eventService.getEventByID(eventId);
     if (event.availableTickets < amount) {

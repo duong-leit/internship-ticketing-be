@@ -8,27 +8,6 @@ import { OrderRequestDto } from '../dto/payment.dto';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  // @Get('/order')
-  // async getMyOrder() {
-  //   const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-  //   const page = 0;
-  //   return this.paymentService.getMyTicketOrder(userId, page);
-  // }
-
-  // @Get('order/:orderId')
-  // @ApiParam({ name: 'orderId', required: true })
-  // async getMyTicketByOrder(
-  //   @Param('orderId') orderId: string,
-  //   @Query() query: { page: number }
-  // ) {
-  //   const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-  //   return await this.paymentService.getOrderDetails(
-  //     userId,
-  //     orderId,
-  //     query.page
-  //   );
-  // }
-
   @Post()
   @ApiBody({ type: OrderRequestDto })
   checkoutTickets(@Body() data: OrderRequestDto) {
