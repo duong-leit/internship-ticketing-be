@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -10,17 +10,81 @@ import { Recaptcha } from '@nestlab/google-recaptcha';
 import {
   CreateFacebookUserDto,
   CreateSystemUserDto,
+  GetListUserDto,
   UserResponseDto,
 } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
+import { transferResponse } from '../../../common/utils/transferResponse';
+import { Response } from 'express';
+import { BankService } from '../service/bank.service';
+import { AuthService } from '../../auth/service/auth.service';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-  constructor(private userServices: UserService) {}
+  constructor(
+    private userServices: UserService,
+    private bankService: BankService,
+    // @Inject(forwardRef(()=>AuthService))
+    private readonly authService: AuthService
+  ) {}
 
-  @Recaptcha({ action: 'register' })
+  @Post('bank')
+  async createBank(@Res() res: Response) {
+    const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
+    const dataInput = {
+      name: 'Viettinbank',
+      cardHolderName: 'Ha Anh Khoa',
+      creditNumber: '1231 2312 3213',
+    };
+    const response = await this.bankService.createBank({
+      userId,
+      ...dataInput,
+    });
+    transferResponse(res, response);
+  }
+
+  @Get('/:bankId')
+  async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
+    const response = await this.bankService.getOneBank({ id: bankId });
+    transferResponse(res, response);
+  }
+
+  @Post()
+  @ApiBody({
+    type: GetListUserDto,
+  })
+  @ApiBadRequestResponse()
+  async getUserPaging(
+    @Param() param: { id: string },
+    @Body()
+    data: {
+      filter: {
+        [key: string]: string | number;
+      };
+      pagination: {
+        pageSize: number;
+        pageIndex: number;
+      };
+    },
+    @Res() res: Response
+  ) {
+    const filter = data.filter ?? data.filter;
+    const pagination = data.pagination ?? {
+      pageSize: data.pagination?.pageSize,
+      pageIndex: data.pagination?.pageIndex,
+    };
+
+    const response = await this.userServices.getListUser(
+      { ...filter },
+      { arrayRelation: ['role'] },
+      { ...pagination }
+    );
+    transferResponse(res, response);
+  }
+
   @Post('/register')
+  @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
     type: UserResponseDto,
@@ -33,10 +97,12 @@ export class UserController {
     description: 'google recaptcha',
   })
   @ApiBody({ type: CreateSystemUserDto })
-  registerUser(
-    @Body() userInfo: CreateSystemUserDto
-  ): Promise<UserResponseDto> {
-    return this.userServices.createSystemUser(userInfo);
+  async registerUser(
+    @Body() userInfo: CreateSystemUserDto,
+    @Res() res: Response
+  ) {
+    const response = await this.userServices.createSystemUser(userInfo);
+    transferResponse(res, response);
   }
 
   @Post('/facebookRegister')
@@ -48,9 +114,21 @@ export class UserController {
     description: 'Email is already used',
   })
   @ApiBody({ type: CreateFacebookUserDto })
-  registerFacebookUser(
-    @Body() userInfo: CreateFacebookUserDto
-  ): Promise<UserResponseDto> {
-    return this.userServices.createFacebookUser(userInfo);
+  async registerFacebookUser(
+    @Body() createFacebookUserDto: CreateFacebookUserDto,
+    @Res() res: Response
+  ) {
+    const userInfo = await this.authService.fetchFacebookInfo(
+      createFacebookUserDto.accessToken
+    );
+    if (userInfo.statusCode !== 200) {
+      transferResponse(res, userInfo);
+      return;
+    }
+    const response = await this.userServices.createFacebookUser(
+      createFacebookUserDto,
+      userInfo.data
+    );
+    transferResponse(res, response);
   }
 }

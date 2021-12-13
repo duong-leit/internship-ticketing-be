@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './controller/user.controller';
 import { UserRepository } from './infrastructure/user.repository';
@@ -7,7 +7,13 @@ import { RoleModule } from '../role/role.module';
 import { BankRepository } from './infrastructure/bank.repository';
 import { WalletRepository } from './infrastructure/wallet.repository';
 import { FacebookAuthModule } from 'facebook-auth-nestjs';
-import { facebookAuthModuleOption } from 'src/configs/configuration';
+import {
+  facebookAuthModuleOption,
+  jwtModuleOption,
+} from 'src/configs/configuration';
+import { BankService } from './service/bank.service';
+import { AuthModule } from '../auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -17,10 +23,12 @@ import { facebookAuthModuleOption } from 'src/configs/configuration';
       BankRepository,
       WalletRepository,
     ]),
+    JwtModule.registerAsync(jwtModuleOption),
     RoleModule,
+    forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
-  providers: [UserService],
-  exports: [TypeOrmModule, UserService],
+  providers: [UserService, BankService],
+  exports: [TypeOrmModule, UserService, BankService],
 })
 export class UserModule {}

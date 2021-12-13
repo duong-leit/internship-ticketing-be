@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import configuration, {
-  googleRecatpChaModuleOption,
+  googleRecaptchaModuleOption,
   typeormModuleOption,
 } from './configs/configuration';
-
 import { UserModule } from './modules/user/user.module';
 import { TicketModule } from './modules/ticket/ticket.module';
 import { RoleModule } from './modules/role/role.module';
@@ -17,6 +15,7 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
 import { APP_GUARD } from '@nestjs/core';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
+// import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -25,7 +24,7 @@ import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
       load: [configuration],
     }),
     TypeOrmModule.forRootAsync(typeormModuleOption),
-    GoogleRecaptchaModule.forRootAsync(googleRecatpChaModuleOption),
+    GoogleRecaptchaModule.forRootAsync(googleRecaptchaModuleOption),
     UserModule,
     TicketModule,
     RoleModule,

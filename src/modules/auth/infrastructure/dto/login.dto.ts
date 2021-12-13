@@ -27,7 +27,7 @@ export class FacebookLoginDto {
 
 export class userInfo {
   name?: string;
-  avatar?: string;
+  avatarUrl?: string;
   email?: string;
 }
 

@@ -2,7 +2,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ACTION_RECAPTCHA, SCORE_RECAPTCHA } from 'src/common/constant';
 
-
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
   database: {
@@ -44,12 +43,12 @@ export const typeormModuleOption: TypeOrmModuleAsyncOptions = {
   }),
 };
 
-export const googleRecatpChaModuleOption = {
+export const googleRecaptchaModuleOption = {
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
     secretKey: configService.get('recaptchaSecretKey'),
     response: (req) => (req.headers.recaptcha || '').toString(),
-    // skipIf: process.env.NODE_ENV !== 'production',
+    skipIf: process.env.NODE_ENV !== 'production',
     actions: ACTION_RECAPTCHA,
     score: SCORE_RECAPTCHA,
   }),
@@ -68,7 +67,6 @@ export const facebookAuthModuleOption = {
 export const jwtModuleOption = {
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => {
-    console.log(configService);
     return {
       secret: configService.get<string>('jwtSecretKey'),
       signOptions: { expiresIn: '7d' },
