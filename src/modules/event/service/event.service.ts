@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
 import { EventEntity } from '../domain/entities/event.entity';
@@ -9,7 +10,9 @@ import { EventRepository } from '../infrastructure/event.repository';
 export class EventService {
   constructor(
     @InjectRepository(EventRepository)
-    private readonly eventRepository: EventRepository
+    private readonly eventRepository: EventRepository,
+    @Inject(REQUEST) private readonly req: any,
+    @Inject(Response) private readonly res: any
   ) {}
 
   private transferEntityToDto(
@@ -40,12 +43,13 @@ export class EventService {
 
   async getEventByCreator(
     data: string,
-    relations: { arrayRelation: string[] } | undefined = undefined,
     paging: { pageSize: number; pageIndex: number } | undefined = {
       pageSize: 10,
       pageIndex: 1
     }
   ) {
+    if (paging.pageIndex == 0) paging.pageIndex = 1;
+    if (paging.pageSize == 0) paging.pageSize = 10;
     // const dataCheck = {
     //   [Object.keys(data)[0]]: data[Object.keys(data)[0]],
     // };
@@ -55,7 +59,7 @@ export class EventService {
     
     
     const [result, total] = await this.eventRepository.findAndCount({
-      relations: relations?.arrayRelation || undefined,
+      relations: ['category'],
       where: {
         userId: data,
         isDeleted: false,
@@ -80,74 +84,113 @@ export class EventService {
     };
   }
 
-  async getEventsByCategory(categoryId: string){
-    return await this.eventRepository.findOne({
-      relations: ['eventCategory'],
-      where: {categoryId: categoryId}})
-  }
+  async getEventsByCategory(
+    categoryId: string,
+    //relations: { arrayRelation: string[] } | undefined = undefined,
+    paging: { pageSize: number; pageIndex: number } | undefined = {
+      pageSize: 10,
+      pageIndex: 1
+    }){
+    const take = paging.pageSize || 10;
+    const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
+    //console.log(dataCheck);
+    
+    
+    const [result, total] = await this.eventRepository.findAndCount({
+      //relations: relations?.arrayRelation || undefined,
+      relations: ['category'],
+      where: {
+        categoryId: categoryId,
+        isDeleted: false,
+      },
+      // order: { name: 'DESC' },
+      take: take,
+      skip: skip === 0 ? 0 : skip * take,
+    });
 
-  private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
+    //console.log(Object.getOwnPropertyNames(UserResponseDto));
+    //console.log(result);
+    
     return {
-      statusCode: statusCode,
-      message: message
-    }
+      statusCode: 200,
+      data: result,
+      //data: UserService.transferEntityToDto(result),
+      pagination: {
+        _totalPage: Math.ceil(total / take),
+        _pageSize: take,
+        _pageIndex: skip + 1,
+      },
+    };
   }
+    // return await this.eventRepository.findOne({
+    //   relations: ['eventCategory'],
+    //   where: {categoryId: categoryId}})
+  //}
 
-  private async responeSuccessMessage(statusCode: number, message: string, data: object): Promise<EventResponeDto>{
-    return {
-      statusCode: statusCode,
-      message: message,
-      data: data
-    }
-  }
+  // private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
+  //   return {
+  //     statusCode: statusCode,
+  //     message: message
+  //   }
+  // }
+
+  // private async responeSuccessMessage(statusCode: number, message: string, data: object): Promise<EventResponeDto>{
+  //   return {
+  //     statusCode: statusCode,
+  //     message: message,
+  //     data: data
+  //   }
+  // }
 
   async createEvent(eventInfo: EventDto): Promise<EventResponeDto>{
     try {
       const newEvent = this.eventRepository.create(eventInfo);
       const event = await this.eventRepository.save(newEvent);
-      return this.responeSuccessMessage(201, "Event created successfully", {id: event.id})
+      return //this.responeSuccessMessage(201, "Event created successfully", {id: event.id})
     } catch (error) {
-      return this.responeErrorMessage(400, "Cannot create new event", )
+      return //this.responeErrorMessage(400, "Cannot create new event", )
     }
   }
 
-  async updateAvailableTickets(eventId: string, ticketAmount: number): Promise<EventResponeDto>{
+  async updateAvailableTickets(eventId: string, ticketAmount: number): Promise<EventEntity>{
     try {
       const event = await this.getEventByID(eventId);
       if(!event){
-        return this.responeErrorMessage(404, "Cannot find the event")
+        return null
       }  
-      if (event.availableTickets < (-ticketAmount)){
-        return this.responeErrorMessage(400, "Not enough tickets")
+      if (event.availableTickets < ticketAmount){
+        return null
       }
-      const availableTickets = event.availableTickets + ticketAmount;
-      this.eventRepository.save(
+      const availableTickets = event.availableTickets - ticketAmount;
+      return await this.eventRepository.save(
         {
           ...event,
           availableTickets: availableTickets
         }
       )
-      return this.responeSuccessMessage(201, "AvailableTickets updated sucessfully",{availableTickets: availableTickets})
+      return //this.responeSuccessMessage(201, "AvailableTickets updated sucessfully",{availableTickets: availableTickets})
     } catch (error) {
-      return this.responeErrorMessage(500, "Cannot update available tickets");
+      return null
     }
   }
 
-  async updateEvent(eventId: string, eventInfo: EventDto, user: IJwtUser): Promise<EventResponeDto>{
+  async updateEvent(eventId: string, eventInfo: EventDto): Promise<EventResponeDto>{
     try {
+      console.log(this.req.body );
+      
       const event = await this.getEventByID(eventId);
-      if((event).userId != user.userId) {
-        return await this.responeErrorMessage(401, "Permission denied");
+      if((event).userId != this.req.user.userId) {
+        return //this.responeErrorMessage(401, "Permission denied");
       }
       //update Event
       this.eventRepository.save({
         ...event, //existed Info
         ...eventInfo //Update Info
       })
-      return this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
+      return //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
     } catch (error) {
       //console.log(error);
-      return this.responeErrorMessage(400, "Cannot update event");
+      return //this.responeErrorMessage(400, "Cannot update event");
     }
   }
 }

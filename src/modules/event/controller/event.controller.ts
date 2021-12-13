@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put, Query, Request, Response } from '@nestjs/common';
 import { EventService } from '../service/event.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { EventDto, EventResponeDto } from '../dto/event.dto';
+import { EventDto, EventResponeDto, PaginationDto } from '../dto/event.dto';
 import { transferResponse } from 'src/common/utils/transferResponse';
 
 @ApiTags('Event')
@@ -9,7 +9,7 @@ import { transferResponse } from 'src/common/utils/transferResponse';
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @Post('/create')
+  @Post()
   @ApiBody({type: EventDto})
   async createEvent(
     @Body() eventInfo: EventDto,
@@ -21,7 +21,7 @@ export class EventController {
     transferResponse(res, response);
   }
 
-  @Put('/update/:eventId')
+  @Put('/:eventId')
   //@ApiBody()
   //Guard
   //Role
@@ -37,19 +37,25 @@ export class EventController {
       role: "User",
     }
     //
-    const response = await this.eventService.updateEvent(eventId, eventInfo, user)
+    const response = await this.eventService.updateEvent(eventId, eventInfo)
     transferResponse(res, response);
   }
 
-  @Get('/myEvent')
+  @Get()
   async getMyEvent(
+    @Body() pagination: PaginationDto,
+    @Response() res: any,
+    // @Query('relations')
+    // relations: string[],
   ){
     const user = {
       userId: "22e60f44-f4ed-4a70-923d-c76ed756a31d",
       email: "123@gmail.com",
       role: "User",
     }
-    //console.log(await this.eventService.getEventByCreator(user.userId));
-     
+    //const pagination = data.pagination ?? {pageSize: data.pagination?.pageSize, pageIndex: data.pagination?.pageIndex}
+    const response = await this.eventService.getEventByCreator(user.userId, pagination);
+    //console.log(response);
+    transferResponse(res, response);
   }
 }
