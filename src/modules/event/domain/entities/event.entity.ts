@@ -6,7 +6,7 @@ import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
-  @Column({ type: 'text', nullable: false})
+  @Column({ type: 'text', nullable: false })
   name: string;
 
   @Column({ type: 'text', nullable: true })
@@ -69,27 +69,30 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
 
-  @Column({ type: 'enum', enum: EventStatusEnum, default: EventStatusEnum.Pending })
+  @Column({
+    type: 'enum',
+    enum: EventStatusEnum,
+    default: EventStatusEnum.Ready,
+  })
   status: EventStatusEnum;
 
-  @Column({type: 'uuid', name: 'categoryId'})
+  @Column({ type: 'uuid', name: 'categoryId' })
   categoryId: string;
 
-  @Column({type: 'uuid', name: 'userId'})
+  @Column({ type: 'uuid', name: 'userId' })
   userId: string;
 
   @ManyToOne(
     () => EventCategoryEntity,
-    (category: EventCategoryEntity) => category.id)
-  @JoinColumn({name: 'categoryId'})
+    (category: EventCategoryEntity) => category.id
+  )
+  @JoinColumn({ name: 'categoryId' })
   category!: EventCategoryEntity;
 
-  @ManyToOne(
-    () => UserEntity,
-    (publisher: UserEntity) => publisher.id)
-  @JoinColumn({name: 'userId'})
+  @ManyToOne(() => UserEntity, (publisher: UserEntity) => publisher.id)
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
   @OneToMany(() => OrderEntity, (order: OrderEntity) => order.id)
-  order: OrderEntity[]
+  order: OrderEntity[];
 }

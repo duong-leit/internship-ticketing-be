@@ -3,58 +3,57 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   Length,
 } from 'class-validator';
 import { GenderEnum } from '../domain/enums/gender.enum';
 
-class FacebookDataDto {
-  @Length(1)
-  @ApiProperty()
-  @IsString()
-  username: string;
+// class FacebookDataDto {
+//   @Length(1)
+//   @ApiProperty()
+//   @IsString()
+//   username: string;
+//
+//   @Length(1, 255)
+//   @ApiProperty()
+//   @IsString()
+//   email: string;
+//
+//   @Length(1)
+//   @ApiProperty()
+//   @IsString()
+//   name: string;
+//
+//   @Length(1)
+//   @ApiProperty()
+//   @IsOptional()
+//   birthday?: string;
+//
+//   @ApiProperty()
+//   @IsString()
+//   avatarUrl?: string;
+// }
 
-  @Length(1, 255)
+export class filterDto {
   @ApiProperty()
-  @IsString()
-  email: string;
-
-  @Length(1)
-  @ApiProperty()
-  @IsString()
-  name: string;
-
-  @Length(1)
-  @ApiProperty()
-  @IsOptional()
-  birthday?: string;
-
-  @ApiProperty()
-  @IsString()
-  avatarUrl?: string;
+  key: string | number;
 }
 
-export class filterDto{
-  @ApiProperty()
-  key : string | number
-}
-
-export class paginationDto{
+export class paginationDto {
   @ApiProperty()
   pageSize: number;
 
   @ApiProperty()
-  pageIndex: number
+  pageIndex: number;
 }
 
 export class GetListUserDto {
-  @ApiProperty({type: filterDto})
-  filter: filterDto
+  @ApiProperty({ type: filterDto })
+  filter: filterDto;
 
-  @ApiProperty({type: paginationDto})
-  pagination: paginationDto
+  @ApiProperty({ type: paginationDto })
+  pagination: paginationDto;
 }
 
 export class CreateSystemUserDto {
@@ -77,13 +76,21 @@ export class CreateSystemUserDto {
 }
 
 export class CreateFacebookUserDto {
-  @IsNotEmpty()
-  @IsObject({ each: true })
   @ApiProperty()
-  data: FacebookDataDto;
+  @IsNotEmpty()
+  accessToken: string;
 
   @ApiProperty()
-  accessToken: string;
+  @IsOptional()
+  avatarUrl?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  name: string;
 }
 
 export class CreateUserResponseDto {
