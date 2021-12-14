@@ -12,7 +12,8 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { EventModule } from './modules/event/event.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
-// import { BullModule } from '@nestjs/bull';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
 
 @Module({
   imports: [
@@ -28,6 +29,12 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
     PaymentModule,
     EventModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}
