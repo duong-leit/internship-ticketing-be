@@ -12,22 +12,16 @@ export class generateTicketConsumer {
     private readonly eventService: EventService
   ) {}
   @Process('generate')
-  async generate(job: Job<{ orderId: string; Id: string; id: number }>) {
+  async generate(job: Job<{ orderId: string; orderDetailId: string }>) {
     try {
       // call tatum => token
       // add token to wallet seller
-      console.log('generate: ', {
-        orderId: job.data.orderId,
-        nftToken: String(job.data.id),
-      });
-      await this.orderDetailRepository.insert({
-        orderId: job.data.orderId,
-        nftToken: String(job.data.id),
-      });
+      await this.orderDetailRepository.update(
+        { orderId: job.data.orderId, id: job.data.orderDetailId },
+        { nftToken: ((Math.random() * 1000000) ** 2).toString() }
+      );
     } catch (error) {
-      console.log({
-        status: error,
-      });
+      console.log('generate-ticket-token', error);
     }
   }
 }

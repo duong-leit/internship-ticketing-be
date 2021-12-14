@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
 import { QueryRunner } from 'typeorm';
 import { EventEntity } from '../domain/entities/event.entity';
@@ -136,28 +137,24 @@ export class EventService {
     ticketAmount: number,
     queryRunner: QueryRunner = undefined
   ): Promise<EventEntity> {
-    try {
-      const event = await this.getEventByID(eventId);
-      if (!event) {
-        return null;
-      }
-      if (event.availableTickets < -ticketAmount) {
-        return null;
-      }
-      const availableTickets = event.availableTickets + ticketAmount;
-      if (queryRunner) {
-        return queryRunner.manager.save(EventEntity, {
-          ...event,
-          availableTickets: availableTickets,
-        });
-      }
-      return this.eventRepository.save({
+    const event = await this.getEventByID(eventId);
+    if (!event) {
+      throw new BadRequestException(ErrorCodeEnum.NOT_FOUND_EVENT);
+    }
+    if (event.availableTickets < -ticketAmount) {
+      throw new BadRequestException(ErrorCodeEnum.INVALID_NUMBER_TICKET);
+    }
+    const availableTickets = event.availableTickets + ticketAmount;
+    if (queryRunner) {
+      return queryRunner.manager.save(EventEntity, {
         ...event,
         availableTickets: availableTickets,
       });
-    } catch (error) {
-      return null;
     }
+    return this.eventRepository.save({
+      ...event,
+      availableTickets: availableTickets,
+    });
   }
 
   async updateEvent(

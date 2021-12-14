@@ -5,26 +5,29 @@ import { OrderService } from './service/order.service';
 import { BullModule } from '@nestjs/bull';
 import { generateTicketConsumer } from './infrastructure/ticket.consumer';
 import processor from './infrastructure/ticket.processor';
-// import { PaymentModule } from '../payment/payment.module';
 import { EventModule } from '../event/event.module';
 import { OrderRepository } from './infrastructure/repositories/order.repository';
 import { OrderDetailRepository } from './infrastructure/repositories/orderDetail.repository';
+import {
+  REDIS_QUEUE_LIMIT_BOUNCEBACK,
+  REDIS_QUEUE_LIMIT_DURATION,
+  REDIS_QUEUE_LIMIT_MAX,
+} from 'src/common/constant';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrderRepository, OrderDetailRepository]),
-    // forwardRef(() => PaymentModule),
-    EventModule, //forwardRef(() => ),
+    EventModule,
     BullModule.forRootAsync({
       useFactory: () => ({
         redis: {
-          host: 'localhost',
-          port: 6379,
+          host: process.env.REDIS_HOST,
+          port: Number(process.env.REDIS_PORT),
         },
         limiter: {
-          max: 5,
-          duration: 5000,
-          bounceBack: false,
+          max: REDIS_QUEUE_LIMIT_MAX,
+          duration: REDIS_QUEUE_LIMIT_DURATION,
+          bounceBack: REDIS_QUEUE_LIMIT_BOUNCEBACK,
         },
       }),
     }),

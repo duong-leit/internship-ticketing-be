@@ -46,7 +46,7 @@ export class UserController {
 
   @Get('/:bankId')
   async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
-    const response = await this.bankService.getOneBank({ id: bankId });
+    const response = await this.bankService.getBank({ id: bankId });
     transferResponse(res, response);
   }
 
