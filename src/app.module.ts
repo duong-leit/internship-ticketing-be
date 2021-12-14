@@ -14,6 +14,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
+import { APP_GUARD } from '@nestjs/core';
+import { RoleGuard } from './modules/auth/guards/role.guard';
+import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
 
 @Module({
   imports: [
@@ -31,6 +34,14 @@ import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
     AuthModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
