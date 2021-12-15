@@ -3,7 +3,7 @@ import { OrderController } from './controller/order.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderService } from './service/order.service';
 import { BullModule } from '@nestjs/bull';
-import { generateTicketConsumer } from './infrastructure/ticket.consumer';
+import { GenerateTicketConsumer } from './infrastructure/ticket.consumer';
 import processor from './infrastructure/ticket.processor';
 import { EventModule } from '../event/event.module';
 import { OrderRepository } from './infrastructure/repositories/order.repository';
@@ -37,7 +37,7 @@ import {
     }),
   ],
   controllers: [OrderController],
-  providers: [OrderService, generateTicketConsumer],
+  providers: [OrderService, GenerateTicketConsumer],
   exports: [TypeOrmModule, OrderService],
 })
 export class OrderModule {}

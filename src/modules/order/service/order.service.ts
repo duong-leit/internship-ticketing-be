@@ -1,19 +1,24 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Queue } from 'bull';
 import { EventService } from 'src/modules/event/service/event.service';
 import { QueryRunner } from 'typeorm';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { OrderDetailEntity } from '../domain/entities/orderDetail.entity';
+import {
+  IOrder,
+  IOrderDetail,
+} from '../domain/interfaces/IOrderDetail.interface';
 import { ICreateOrderDetails } from '../domain/interfaces/ITicket.interface';
 import { OrderRepository } from '../infrastructure/repositories/order.repository';
+import { OrderDetailRepository } from '../infrastructure/repositories/orderDetail.repository';
 
 @Injectable()
 export class OrderService {
-  orderDetailRepository: any;
   constructor(
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
     private readonly orderRepository: OrderRepository,
+    private readonly orderDetailRepository: OrderDetailRepository,
     private readonly eventService: EventService
   ) {}
   async getHello(): Promise<string> {
@@ -23,37 +28,53 @@ export class OrderService {
   async getOrders(
     condition?: { [field: string]: string | number },
     relations: string[] | undefined = ['event'],
-    paging?: { take?: number; pageIndex?: number }
-  ) {
-    const orders = await this.orderRepository.find({
+    page?: number,
+    limit?: number
+  ): Promise<IOrder> {
+    const [orders, totalItems] = await this.orderRepository.findAndCount({
       relations: relations || undefined,
       where: condition,
-      take: paging.take,
-      skip: paging.pageIndex ? (paging.pageIndex - 1) * 5 : 0,
+      take: limit,
+      skip: page ? (page - 1) * limit : 0,
     });
-    return orders;
+    return {
+      items: orders,
+      meta: {
+        totalItems: totalItems,
+        itemsPerPage: limit,
+        currentPage: page,
+      },
+    };
   }
 
   async getOrderDetails(
     userId: string,
     orderId: string,
-    take = 5,
-    page?: number
-  ): Promise<OrderDetailEntity> {
+    page?: number,
+    limit?: number
+  ): Promise<IOrderDetail> {
     const order = await this.orderRepository.findOne({
-      where: { buyerId: userId },
+      where: { buyerId: userId, id: orderId },
     });
-    if (order?.id != orderId) {
-      throw "User don't have this order";
+    if (!order) {
+      throw new NotFoundException("User don't have this order");
     }
 
-    const orderDetails = await this.orderDetailRepository.find({
-      where: { orderId },
-      take: take,
-      skip: page ? (page - 1) * 5 : 0,
-    });
+    const [orderDetails, totalItems] =
+      await this.orderDetailRepository.findAndCount({
+        where: { orderId: orderId },
+        take: limit,
+        skip: page ? (page - 1) * limit : 0,
+      });
 
-    return orderDetails;
+    return {
+      items: orderDetails,
+      meta: {
+        totalItems: totalItems,
+        itemsPerPage: limit,
+        currentPage: page,
+      },
+    };
   }
 
   async createOrder(

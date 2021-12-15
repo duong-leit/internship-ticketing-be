@@ -1,16 +1,10 @@
 import { Processor, Process } from '@nestjs/bull';
-import { forwardRef, Inject } from '@nestjs/common';
 import { Job } from 'bull';
-import { EventService } from 'src/modules/event/service/event.service';
 import { OrderDetailRepository } from './repositories/orderDetail.repository';
 
 @Processor('generate-ticket-token')
-export class generateTicketConsumer {
-  constructor(
-    private orderDetailRepository: OrderDetailRepository,
-    @Inject(forwardRef(() => EventService))
-    private readonly eventService: EventService
-  ) {}
+export class GenerateTicketConsumer {
+  constructor(private orderDetailRepository: OrderDetailRepository) {}
   @Process('generate')
   async generate(job: Job<{ orderId: string; orderDetailId: string }>) {
     try {
