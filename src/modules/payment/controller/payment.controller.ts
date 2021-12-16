@@ -1,52 +1,46 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { PaymentService } from '../service/payment.service';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { OrderRequestDto } from '../dto/payment.dto';
+import { Connection } from 'typeorm';
+import { transferResponse } from 'src/common/utils/transferResponse';
+import { Response } from 'express';
+import { Roles } from 'src/modules/auth/roles.decorator';
+import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
 
 @ApiTags('Payment')
+@Roles(RoleEnum.User)
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
-
-  @Get('/order')
-  async getMyOrder() {
-    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    const page = 0;
-    return this.paymentService.getMyTicketOrder(userId, page);
-  }
-
-  @Get('order/:orderId')
-  @ApiParam({ name: 'orderId', required: true })
-  async getMyTicketByOrder(
-    @Param('orderId') orderId: string,
-    @Query() query: { page: number }
-  ) {
-    const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    console.log(orderId);
-    return await this.paymentService.getOrderDetails(
-      userId,
-      orderId,
-      query.page
-    );
-  }
+  constructor(
+    private readonly paymentService: PaymentService,
+    private connection: Connection
+  ) {}
 
   @Post()
   @ApiBody({ type: OrderRequestDto })
-  checkoutTickets(@Body() data: OrderRequestDto) {
-    /* const userId = 'af9541d5-dfef-4cfb-9e07-fe079adca878';
-    const data = {
-      eventId: '598c46aa-eb10-49c5-9dfa-965cffe14801',
-      amount: 3,
-      bank: {
-        creditNumber: '123',
-        name: 'TPBank',
-        cardHolderName: 'Ha Anh Khoa',
-      },
-    };
-    */
-    return this.paymentService.handleTicketPayment({
-      ...data,
-      // req.user.userId
-    });
+  async checkoutTickets(
+    @Req() req,
+    @Body() data: OrderRequestDto,
+    @Res() res: Response
+  ) {
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const orderId = await this.paymentService.handleCheckout(
+        {
+          ...data,
+          userId: req.user.userId,
+        },
+        queryRunner
+      );
+      queryRunner.commitTransaction();
+      transferResponse(res, { statusCode: 200, data: orderId });
+    } catch (error) {
+      console.log(error);
+      queryRunner.rollbackTransaction();
+      throw error;
+    }
   }
 }

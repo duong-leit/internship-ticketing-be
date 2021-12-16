@@ -26,7 +26,6 @@ export class EventController {
     @Response() res: any,
     @Request() req: any
   ) {
-    // console.log(req.user);
     const response = await this.eventService.createEvent(eventInfo);
     transferResponse(res, response);
   }
@@ -62,6 +61,5 @@ export class EventController {
       email: '123@gmail.com',
       role: 'User',
     };
-    //console.log(await this.eventService.getEventByCreator(user.userId));
   }
 }

@@ -1,8 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TicketService } from 'src/modules/ticket/service/ticket.service';
+import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
+import { QueryRunner } from 'typeorm';
 import { EventEntity } from '../domain/entities/event.entity';
+// import { EventEntity } from '../domain/entities/event.entity';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { EventRepository } from '../infrastructure/event.repository';
 
@@ -10,9 +12,7 @@ import { EventRepository } from '../infrastructure/event.repository';
 export class EventService {
   constructor(
     @InjectRepository(EventRepository)
-    private readonly eventRepository: EventRepository,
-    @Inject(forwardRef(() => TicketService))
-    private readonly ticketService: TicketService
+    private readonly eventRepository: EventRepository // @Inject(forwardRef(() => TicketService)) // private readonly ticketService: TicketService
   ) {}
 
   // private transferEntityToDto(
@@ -37,7 +37,13 @@ export class EventService {
   //   }));
   // }
 
-  async getEventByID(eventId: string) {
+  async getEventByID(
+    eventId: string,
+    queryRunner: QueryRunner = null
+  ): Promise<EventEntity> {
+    if (queryRunner !== null) {
+      return await queryRunner.manager.findOne('event', eventId);
+    }
     return await this.eventRepository.findOne({
       where: { id: eventId },
     });
@@ -56,7 +62,6 @@ export class EventService {
     // };
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
-    //console.log(dataCheck);
 
     const [result, total] = await this.eventRepository.findAndCount({
       relations: relations?.arrayRelation || undefined,
@@ -68,9 +73,6 @@ export class EventService {
       take: take,
       skip: skip === 0 ? 0 : skip * take,
     });
-
-    //console.log(Object.getOwnPropertyNames(UserResponseDto));
-    console.log(result);
 
     return {
       statusCode: 200,
@@ -117,11 +119,11 @@ export class EventService {
     try {
       const newEvent = this.eventRepository.create(eventInfo);
       const event = await this.eventRepository.save(newEvent);
-      await this.ticketService.createTicketsByEvent({
-        userId: eventInfo.userId,
-        amount: eventInfo.totalTickets,
-        eventId: event.id,
-      });
+      // await this.ticketService.createTicketsByEvent({
+      //   userId: eventInfo.userId,
+      //   amount: eventInfo.totalTickets,
+      //   eventId: event.id,
+      // });
       return this.responeSuccessMessage(201, 'Event created successfully', {
         id: event.id,
       });
@@ -132,29 +134,27 @@ export class EventService {
 
   async updateAvailableTickets(
     eventId: string,
-    ticketAmount: number
-  ): Promise<EventResponeDto> {
-    try {
-      const event = await this.getEventByID(eventId);
-      if (!event) {
-        return this.responeErrorMessage(404, 'Cannot find the event');
-      }
-      if (event.availableTickets < -ticketAmount) {
-        return this.responeErrorMessage(400, 'Not enough tickets');
-      }
-      const availableTickets = event.availableTickets + ticketAmount;
-      this.eventRepository.save({
+    ticketAmount: number,
+    queryRunner: QueryRunner = undefined
+  ): Promise<EventEntity> {
+    const event = await this.getEventByID(eventId);
+    if (!event) {
+      throw new BadRequestException(ErrorCodeEnum.NOT_FOUND_EVENT);
+    }
+    if (event.availableTickets < -ticketAmount) {
+      throw new BadRequestException(ErrorCodeEnum.INVALID_NUMBER_TICKET);
+    }
+    const availableTickets = event.availableTickets + ticketAmount;
+    if (queryRunner) {
+      return queryRunner.manager.save(EventEntity, {
         ...event,
         availableTickets: availableTickets,
       });
-      return this.responeSuccessMessage(
-        201,
-        'AvailableTickets updated sucessfully',
-        { availableTickets: availableTickets }
-      );
-    } catch (error) {
-      return this.responeErrorMessage(500, 'Cannot update available tickets');
     }
+    return this.eventRepository.save({
+      ...event,
+      availableTickets: availableTickets,
+    });
   }
 
   async updateEvent(

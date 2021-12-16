@@ -1,7 +1,6 @@
-export interface ICreateTicket {
-  userId: string;
+export interface ICreateOrderDetails {
   amount: number;
-  eventId: string;
+  orderId: string;
 }
 export interface ITransferTicket {
   orderId: string;

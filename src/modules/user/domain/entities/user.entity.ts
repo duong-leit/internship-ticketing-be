@@ -4,7 +4,7 @@ import { RoleEntity } from 'src/modules/role/domain/entities/role.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { BankEntity } from './bank.entity';
 import { EventEntity } from '../../../event/domain/entities/event.entity';
-import { OrderEntity } from '../../../payment/domain/entities/order.entity';
+import { OrderEntity } from '../../../order/domain/entities/order.entity';
 
 @Entity('User')
 export class UserEntity extends AppBaseEntity {

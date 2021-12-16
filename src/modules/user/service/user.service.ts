@@ -10,7 +10,6 @@ import { UserEntity } from '../domain/entities/user.entity';
 import { Like } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 
-
 @Injectable()
 export class UserService {
   constructor(
@@ -18,9 +17,8 @@ export class UserService {
     private readonly userRepository: UserRepository,
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository,
-    private readonly jwtService: JwtService,
-  ) {
-  }
+    private readonly jwtService: JwtService
+  ) {}
 
   private static transferEntityToDto(
     users: UserEntity[],
@@ -59,7 +57,6 @@ export class UserService {
     });
     if (!user) return { statusCode: 404, message: 'Notfound' };
 
-    console.log(user);
     return {
       statusCode: 200,
       data: UserService.transferEntityToDto([user], { roleId: true })[0],
@@ -109,7 +106,8 @@ export class UserService {
   private async saveUser(newData: IUser) {
     const result = await this.getOneUser({ email: newData.email });
 
-    if (result.statusCode!==404) return { statusCode: 400, message: 'Email is already taken' };
+    if (result.statusCode !== 404)
+      return { statusCode: 400, message: 'Email is already taken' };
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
@@ -132,7 +130,6 @@ export class UserService {
   }
 
   async createFacebookUser(createFacebookUserDto, userInfo) {
-    console.log(createFacebookUserDto, userInfo)
     if (createFacebookUserDto.email !== userInfo.email)
       return {
         statusCode: 400,
@@ -148,17 +145,16 @@ export class UserService {
       isSocial: true,
     };
     const result = await this.saveUser(newUser);
-    if(result.statusCode!==200)
-      return result
+    if (result.statusCode !== 200) return result;
 
     return {
       statusCode: 200,
       data: {
         name: newUser.name,
         email: newUser.email,
-        avatarUrl: newUser.avatarUrl
+        avatarUrl: newUser.avatarUrl,
       },
-      accessToken: this.generateJWTToken(newUser)
+      accessToken: this.generateJWTToken(newUser),
     };
   }
   generateJWTToken(data: any): string {
