@@ -1,38 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import { CreateSystemUserDto, UserResponseDto } from '../dto/user.dto';
+import { CreateSystemUserDto, UpdateUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS } from 'src/common/constant';
 import { UserEntity } from '../domain/entities/user.entity';
 import { Like } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { AuthService } from '../../auth/service/auth.service';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({scope: Scope.REQUEST})
 export class UserService {
   constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
     @InjectRepository(RoleRepository)
     private readonly roleRepository: RoleRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
+    @Inject(REQUEST) private readonly request,
   ) {}
 
   private static transferEntityToDto(
     users: UserEntity[],
     ignore: { [key: string]: boolean } | undefined = undefined
-  ) {
+  ){
     return users.map((_user) => ({
       id: !ignore['id'] ? _user.id : undefined,
       createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
       updatedAt: !ignore['name'] ? _user.name : undefined,
       name: !ignore['name'] ? _user.name : undefined,
-      email: !!ignore['email'] ? _user.email : undefined,
+      email: !ignore['email'] ? _user.email : undefined,
       username: !ignore['username'] ? _user.username : undefined,
       birthday: !ignore['birthday'] ? _user.birthday : undefined,
-      numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
+      phoneNumber: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
       password: !ignore['password'] ? _user.password : undefined,
       gender: !ignore['gender'] ? _user.gender : undefined,
       avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
@@ -42,7 +47,16 @@ export class UserService {
     }));
   }
 
-  async getOneUser(
+  async getUserInfo(){
+    const result = await this.getUser({id: this.request.user.userId});
+    if(!result.data) return { statusCode: 404, message: 'Notfound' };
+    return {
+      statusCode: 200,
+      data: result.data
+    }
+  }
+
+  async getUser(
     data: { [key: string]: string | number } | undefined = undefined,
     relations: { arrayRelation: string[] } | undefined = {
       arrayRelation: ['role'],
@@ -63,7 +77,7 @@ export class UserService {
     };
   }
 
-  async getListUser(
+  async getUsers(
     data: { [key: string]: string | number } | undefined = undefined,
     relations: { arrayRelation: string[] } | undefined = {
       arrayRelation: ['role'],
@@ -104,7 +118,7 @@ export class UserService {
   }
 
   private async saveUser(newData: IUser) {
-    const result = await this.getOneUser({ email: newData.email });
+    const result = await this.getUser({ email: newData.email });
 
     if (result.statusCode !== 404)
       return { statusCode: 400, message: 'Email is already taken' };
@@ -154,14 +168,41 @@ export class UserService {
         email: newUser.email,
         avatarUrl: newUser.avatarUrl,
       },
-      accessToken: this.generateJWTToken(newUser),
+      accessToken: this.authService.generateJWTToken(newUser),
     };
   }
+
+  async update(userDto: UpdateUserDto, id: string){
+    const result = (await this.getUser({id: id}));
+    const user = result.data;
+    if(!user) return{ statusCode: 400, message: 'User Error' }
+    const role = (await this.roleRepository.findOne({name: user.role}))
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { createdAt, updatedAt, ...res } = user;
+    const newUser: UserEntity = await this.userRepository.save({
+      ...res,
+      role: role,
+      name: userDto.name? userDto.name : user.name,
+      password: (userDto.password===user.password) ? user.password : await bcrypt.hash(userDto.password, SALT_OR_ROUNDS),
+      birthday: userDto.birthday? userDto.birthday : user.birthday,
+      gender: userDto.gender ? userDto.gender : user.gender,
+      phoneNumber: userDto.phoneNumber? userDto.phoneNumber : user.phoneNumber,
+    });
+
+    if(!newUser){
+      return{ statusCode: 500, message: 'Server Error' }
+    }
+    return {
+      statusCode: 200,
+      message: 'Update Successfully'
+    }
+  }
+
   generateJWTToken(data: any): string {
     const payload = {
       sub: data.id || null,
       email: data.email || null,
-      role: data.role?.name || null,
+      role: data.role || null,
     };
     return this.jwtService.sign(payload);
   }
