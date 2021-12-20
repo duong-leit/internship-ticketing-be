@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { FacebookAuthService } from 'facebook-auth-nestjs';
@@ -8,17 +8,20 @@ import {
   FacebookLoginDto,
   UserLoginDto,
 } from '../infrastructure/dto/login.dto';
+import { REQUEST } from '@nestjs/core';
 
-@Injectable()
+@Injectable({scope: Scope.REQUEST})
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly fbService: FacebookAuthService,
-    private readonly userService: UserService
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
+    @Inject(REQUEST) private readonly request,
   ) {}
 
   async systemLogin(data: UserLoginDto) {
-    const result = await this.userService.getOneUser({
+    const result = await this.userService.getUser({
       username: data.username,
     });
     if (
@@ -26,6 +29,20 @@ export class AuthService {
       !bcrypt.compareSync(data.password, result.data.password)
     )
       return { statusCode: 400, message: 'Wrong username or password' };
+    return {
+      statusCode: 200,
+      data: {
+        name: result.data.name,
+        avatarUrl: result.data.avatarUrl,
+      },
+      accessToken: this.generateJWTToken(result.data),
+    };
+  }
+
+  async refreshToken(){
+    const result = await this.userService.getUser({id: this.request.user.userId});
+    if (result.statusCode === 404)
+      return { statusCode: 400, message: 'User have been deleted' };
     return {
       statusCode: 200,
       data: {
@@ -73,7 +90,7 @@ export class AuthService {
     if (!userInfo)
       return { statusCode: 400, message: 'The token have been expired' };
 
-    const result = await this.userService.getOneUser({
+    const result = await this.userService.getUser({
       username: userInfo.id,
     });
     if (result.statusCode === 404) {
@@ -102,7 +119,7 @@ export class AuthService {
     const payload = {
       sub: data.id || null,
       email: data.email || null,
-      role: data.role?.name || null,
+      role: data.role || null,
     };
     return this.jwtService.sign(payload);
   }
