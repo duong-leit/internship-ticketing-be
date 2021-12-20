@@ -3,6 +3,8 @@
 /node_modules
 .env.development
 .env.staging
+/environments/.env.production
+/environments/.env.development
 
 /remove
 
