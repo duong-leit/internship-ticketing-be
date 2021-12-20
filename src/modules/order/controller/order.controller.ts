@@ -1,7 +1,6 @@
 import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
 import { OrderService } from '../service/order.service';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/modules/auth/roles.decorator';
 import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
 import { Response } from 'express';
 import { transferResponse } from 'src/common/utils/transferResponse';
@@ -14,10 +13,11 @@ import {
   OrderDetailResponseDto,
   OrderResponseDto,
 } from '../dto/order.dto';
+import { Roles } from 'src/modules/auth/roles.decorator';
 
 @ApiTags('order')
-@ApiBearerAuth()
 @Roles(RoleEnum.User)
+@ApiBearerAuth()
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -31,8 +31,8 @@ export class OrderController {
     @Query() { page = 1, limit = 5 }: QueryPanigateDto
   ) {
     const data: IOrder = await this.orderService.getOrders(
-      { buyerId: req.user.userId },
-      ['event'],
+      undefined,
+      ['event', 'orderDetail'],
       page,
       limit
     );
