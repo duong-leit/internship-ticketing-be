@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from 'src/modules/user/domain/entities/user.entity';
 import { EventStatusEnum } from '../enums/eventStatus.enum';
 import { AppBaseEntity } from 'src/common/entities/entity';
-import { OrderEntity } from 'src/modules/payment/domain/entities/order.entity';
+import { OrderEntity } from 'src/modules/order/domain/entities/order.entity';
 import { EventCategoryEntity } from './eventCategory.entity';
 @Entity('Event')
 export class EventEntity extends AppBaseEntity {
@@ -27,7 +27,7 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'date', nullable: false })
   saleStartDate: string;
 
-  @Column({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: true })
   saleEndDate: string;
 
   @Column({ type: 'date', nullable: false })
@@ -36,16 +36,16 @@ export class EventEntity extends AppBaseEntity {
   @Column({ type: 'date', nullable: false })
   eventEndDate: string;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 1, nullable: true })
   totalTickets: number;
 
-  @Column({ type: 'int', default: 1, nullable: false })
+  @Column({ type: 'int', default: 0, nullable: true })
   availableTickets: number;
 
   @Column({ type: 'text', nullable: true })
   ticketImageUrl?: string;
 
-  @Column({ type: 'decimal', nullable: false })
+  @Column({ type: 'decimal', nullable: true })
   ticketPrice: number;
 
   @Column({ type: 'int', default: 1, nullable: false })

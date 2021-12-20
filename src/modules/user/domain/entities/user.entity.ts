@@ -1,17 +1,10 @@
 import { GenderEnum } from '../enums/gender.enum';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { RoleEntity } from 'src/modules/role/domain/entities/role.entity';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { BankEntity } from './bank.entity';
 import { EventEntity } from '../../../event/domain/entities/event.entity';
-import { OrderEntity } from '../../../payment/domain/entities/order.entity';
+import { OrderEntity } from '../../../order/domain/entities/order.entity';
 
 @Entity('User')
 export class UserEntity extends AppBaseEntity {
@@ -45,16 +38,15 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isDeleted: boolean;
   //nullable: true?
-  @Column({type: "uuid", name: 'roleId', nullable: true})
+  @Column({ type: 'uuid', name: 'roleId', nullable: true })
   roleId: string;
 
   @ManyToOne(() => RoleEntity, (role: RoleEntity) => role.id)
-  @JoinColumn({name: 'roleId'})
+  @JoinColumn({ name: 'roleId' })
   role!: RoleEntity;
 
-  @OneToOne(() => BankEntity)
-  @JoinColumn()
-  bank: BankEntity;
+  @OneToMany(() => BankEntity, (bank: BankEntity) => bank.id)
+  bank: BankEntity[];
 
   @OneToMany(() => EventEntity, (event: EventEntity) => event.id)
   event!: EventEntity[];

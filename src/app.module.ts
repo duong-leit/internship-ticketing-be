@@ -6,12 +6,17 @@ import configuration, {
   typeormModuleOption,
 } from './configs/configuration';
 import { UserModule } from './modules/user/user.module';
-import { TicketModule } from './modules/ticket/ticket.module';
+import { OrderModule } from './modules/order/order.module';
 import { RoleModule } from './modules/role/role.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { EventModule } from './modules/event/event.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
+import { APP_GUARD } from '@nestjs/core';
+import { RoleGuard } from './modules/auth/guards/role.guard';
+import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
 
 @Module({
   imports: [
@@ -22,11 +27,25 @@ import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
     TypeOrmModule.forRootAsync(typeormModuleOption),
     GoogleRecaptchaModule.forRootAsync(googleRecaptchaModuleOption),
     UserModule,
-    TicketModule,
+    OrderModule,
     RoleModule,
     PaymentModule,
     EventModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

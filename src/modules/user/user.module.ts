@@ -7,7 +7,10 @@ import { RoleModule } from '../role/role.module';
 import { BankRepository } from './infrastructure/bank.repository';
 import { WalletRepository } from './infrastructure/wallet.repository';
 import { FacebookAuthModule } from 'facebook-auth-nestjs';
-import { facebookAuthModuleOption, jwtModuleOption } from 'src/configs/configuration';
+import {
+  facebookAuthModuleOption,
+  jwtModuleOption,
+} from 'src/configs/configuration';
 import { BankService } from './service/bank.service';
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -21,10 +24,11 @@ import { JwtModule } from '@nestjs/jwt';
       WalletRepository,
     ]),
     JwtModule.registerAsync(jwtModuleOption),
-    RoleModule, forwardRef(()=>AuthModule),
+    RoleModule,
+    forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
   providers: [UserService, BankService],
-  exports: [TypeOrmModule, UserService],
+  exports: [TypeOrmModule, UserService, BankService],
 })
 export class UserModule {}

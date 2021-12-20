@@ -1,8 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { IJwtUser } from 'src/modules/user/domain/interfaces/IUser.interface';
+import { QueryRunner } from 'typeorm';
 import { EventEntity } from '../domain/entities/event.entity';
+// import { EventEntity } from '../domain/entities/event.entity';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { EventRepository } from '../infrastructure/event.repository';
 
@@ -12,7 +15,7 @@ export class EventService {
     @InjectRepository(EventRepository)
     private readonly eventRepository: EventRepository,
     @Inject(REQUEST) private readonly req: any,
-    @Inject(Response) private readonly res: any
+    //@Inject(Response) private readonly res: any
   ) {}
 
   private transferEntityToDto(
@@ -36,16 +39,23 @@ export class EventService {
     }));
   }
 
-  async getEventByID(eventId: string){
+  async getEventByID(
+    eventId: string,
+    queryRunner: QueryRunner = null
+  ): Promise<EventEntity> {
+    if (queryRunner !== null) {
+      return await queryRunner.manager.findOne('event', eventId);
+    }
     return await this.eventRepository.findOne({
-      where: {id: eventId}})
+      where: { id: eventId },
+    });
   }
 
   async getEventByCreator(
     //data: string,
     paging: { pageSize: number; pageIndex: number } | undefined = {
       pageSize: 10,
-      pageIndex: 1
+      pageIndex: 1,
     }
   ) {
     if (paging.pageIndex == 0) paging.pageIndex = 1;
@@ -69,9 +79,6 @@ export class EventService {
       skip: skip === 0 ? 0 : skip * take,
     });
 
-    //console.log(Object.getOwnPropertyNames(UserResponseDto));
-    console.log(result);
-    
     return {
       statusCode: 200,
       data: result,
@@ -127,11 +134,14 @@ export class EventService {
     //   where: {categoryId: categoryId}})
   //}
 
-  private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
+  private async responeErrorMessage(
+    statusCode: number,
+    message: string
+  ): Promise<EventResponeDto> {
     return {
       statusCode: statusCode,
-      message: message
-    }
+      message: message,
+    };
   }
 
   async createEvent(eventInfo: EventDto): Promise<EventEntity> {
