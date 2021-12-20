@@ -16,9 +16,11 @@ import {
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { Response } from 'express';
 import { transferResponse } from '../../../common/utils/transferResponse';
+import { Public } from '../roles.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
+@Public()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

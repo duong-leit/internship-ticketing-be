@@ -102,7 +102,7 @@ export class AuthService {
     const payload = {
       sub: data.id || null,
       email: data.email || null,
-      role: data.role?.name || null,
+      role: data.role || null,
     };
     return this.jwtService.sign(payload);
   }

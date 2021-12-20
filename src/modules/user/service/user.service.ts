@@ -31,7 +31,7 @@ export class UserService {
       createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
       updatedAt: !ignore['name'] ? _user.name : undefined,
       name: !ignore['name'] ? _user.name : undefined,
-      email: !!ignore['email'] ? _user.email : undefined,
+      email: !ignore['email'] ? _user.email : undefined,
       username: !ignore['username'] ? _user.username : undefined,
       birthday: !ignore['birthday'] ? _user.birthday : undefined,
       numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
@@ -165,7 +165,7 @@ export class UserService {
     const payload = {
       sub: data.id || null,
       email: data.email || null,
-      role: data.role?.name || null,
+      role: data.role || null,
     };
     return this.jwtService.sign(payload);
   }

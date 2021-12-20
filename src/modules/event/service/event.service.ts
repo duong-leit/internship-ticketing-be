@@ -23,7 +23,7 @@ export class EventService {
       // createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
       // updatedAt: !ignore['name'] ? _user.name : undefined,
       // name: !ignore['name'] ? _user.name : undefined,
-      // email: !!ignore['email'] ? _user.email : undefined,
+      // email: !ignore['email'] ? _user.email : undefined,
       // username: !ignore['username'] ? _user.username : undefined,
       // birthday: !ignore['birthday'] ? _user.birthday : undefined,
       // numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
@@ -42,7 +42,7 @@ export class EventService {
   }
 
   async getEventByCreator(
-    data: string,
+    //data: string,
     paging: { pageSize: number; pageIndex: number } | undefined = {
       pageSize: 10,
       pageIndex: 1
@@ -56,12 +56,12 @@ export class EventService {
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
     //console.log(dataCheck);
-    
-    
+    const userId = this.req.user.userId;
+
     const [result, total] = await this.eventRepository.findAndCount({
       relations: ['category'],
       where: {
-        userId: data,
+        userId: userId,
         isDeleted: false,
       },
       // order: { name: 'DESC' },
@@ -89,13 +89,13 @@ export class EventService {
     //relations: { arrayRelation: string[] } | undefined = undefined,
     paging: { pageSize: number; pageIndex: number } | undefined = {
       pageSize: 10,
-      pageIndex: 1
-    }){
+      pageIndex: 1,
+    }
+  ) {
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
     //console.log(dataCheck);
-    
-    
+
     const [result, total] = await this.eventRepository.findAndCount({
       //relations: relations?.arrayRelation || undefined,
       relations: ['category'],
@@ -127,70 +127,67 @@ export class EventService {
     //   where: {categoryId: categoryId}})
   //}
 
-  // private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
-  //   return {
-  //     statusCode: statusCode,
-  //     message: message
-  //   }
-  // }
-
-  // private async responeSuccessMessage(statusCode: number, message: string, data: object): Promise<EventResponeDto>{
-  //   return {
-  //     statusCode: statusCode,
-  //     message: message,
-  //     data: data
-  //   }
-  // }
-
-  async createEvent(eventInfo: EventDto): Promise<EventResponeDto>{
-    try {
-      const newEvent = this.eventRepository.create(eventInfo);
-      const event = await this.eventRepository.save(newEvent);
-      return //this.responeSuccessMessage(201, "Event created successfully", {id: event.id})
-    } catch (error) {
-      return //this.responeErrorMessage(400, "Cannot create new event", )
+  private async responeErrorMessage(statusCode: number, message: string): Promise<EventResponeDto>{
+    return {
+      statusCode: statusCode,
+      message: message
     }
   }
 
-  async updateAvailableTickets(eventId: string, ticketAmount: number): Promise<EventEntity>{
-    try {
-      const event = await this.getEventByID(eventId);
-      if(!event){
-        return null
-      }  
-      if (event.availableTickets < ticketAmount){
-        return null
-      }
-      const availableTickets = event.availableTickets - ticketAmount;
-      return await this.eventRepository.save(
-        {
-          ...event,
-          availableTickets: availableTickets
-        }
-      )
-      return //this.responeSuccessMessage(201, "AvailableTickets updated sucessfully",{availableTickets: availableTickets})
-    } catch (error) {
-      return null
-    }
+  async createEvent(eventInfo: EventDto): Promise<EventEntity> {
+    eventInfo.userId = this.req.user.userId;
+    console.log(eventInfo.userId);
+
+    const newEvent = this.eventRepository.create(eventInfo);
+    const event = await this.eventRepository.save(newEvent);
+    if (!event) return; //this.responeErrorMessage(400, 'Cannot create new event');
+    // return this.responeSuccessMessage(201, 'Event created successfully', {
+    //   id: event.id,
+    // });
+    return event;
   }
 
-  async updateEvent(eventId: string, eventInfo: EventDto): Promise<EventResponeDto>{
-    try {
-      console.log(this.req.body );
-      
+  async updateAvailableTickets(
+    eventId: string,
+    ticketAmount: number
+  ): Promise<EventEntity> {
+    const event = await this.getEventByID(eventId);
+    if (!event) {
+      return null;
+    }
+    if (event.availableTickets < ticketAmount) {
+      return null;
+    }
+    const availableTickets = event.availableTickets - ticketAmount;
+    return await this.eventRepository.save({
+      ...event,
+      availableTickets: availableTickets,
+    });
+    return; //this.responeSuccessMessage(201, "AvailableTickets updated sucessfully",{availableTickets: availableTickets})
+  }
+
+  async updateEvent(
+    eventId: string,
+    eventInfo: EventDto
+  ): Promise<EventResponeDto> {
+      console.log(this.req.user);
+      console.log(this.req);
+
       const event = await this.getEventByID(eventId);
-      if((event).userId != this.req.user.userId) {
-        return //this.responeErrorMessage(401, "Permission denied");
+      if(!event) {
+        return this.responeErrorMessage(404, "Event not Found");;
       }
+      if (event.userId != this.req.user.userId) {
+        return this.responeErrorMessage(401, "Permission denied");
+      }
+
       //update Event
       this.eventRepository.save({
         ...event, //existed Info
-        ...eventInfo //Update Info
-      })
-      return //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
-    } catch (error) {
+        ...eventInfo, //Update Info
+      });
+      return; //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
       //console.log(error);
-      return //this.responeErrorMessage(400, "Cannot update event");
-    }
+      return; //this.responeErrorMessage(400, "Cannot update event");
   }
 }

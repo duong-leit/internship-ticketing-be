@@ -22,7 +22,7 @@ export class EventDto{
     @ApiProperty()
     categoryId: string;
 
-    @IsNotEmpty()
+    //@IsNotEmpty()
     @IsString()
     @ApiProperty()
     userId: string;
