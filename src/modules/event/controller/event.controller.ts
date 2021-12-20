@@ -3,6 +3,7 @@ import { EventService } from '../service/event.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { EventDto, EventResponeDto } from '../dto/event.dto';
 import { transferResponse } from 'src/common/utils/transferResponse';
+import { response } from 'express';
 
 
 @ApiTags('Event')
@@ -46,6 +47,15 @@ export class EventController {
     transferResponse(res, response);
   }
 
+  @Get()
+  async getEventById(
+    @Param('eventId') eventId: string,
+    @Response() res: any
+  ) {
+    const eventDetail = await this.eventService.getEventByID(eventId);
+    transferResponse(res, response)
+  }
+
   @Get('/myEvent')
   async getMyEvent() {
     // const user = {
@@ -53,10 +63,7 @@ export class EventController {
     //   email: '123@gmail.com',
     //   role: 'User',
     // };
-    //console.log(await this.eventService.getEventByCreator();
+    const events = await this.eventService.getEventByCreator();
   }
-}
-function Roles(User: any) {
-  throw new Error('Function not implemented.');
 }
 
