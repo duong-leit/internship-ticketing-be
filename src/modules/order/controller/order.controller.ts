@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
 import { OrderService } from '../service/order.service';
-import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/modules/auth/roles.decorator';
 import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
 import { Response } from 'express';
@@ -16,6 +16,7 @@ import {
 } from '../dto/order.dto';
 
 @ApiTags('order')
+@ApiBearerAuth()
 @Roles(RoleEnum.User)
 @Controller('order')
 export class OrderController {
