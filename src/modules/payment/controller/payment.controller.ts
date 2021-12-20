@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { PaymentService } from '../service/payment.service';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { OrderRequestDto } from '../dto/payment.dto';
 import { Connection } from 'typeorm';
 import { transferResponse } from 'src/common/utils/transferResponse';
@@ -9,6 +9,7 @@ import { Roles } from 'src/modules/auth/roles.decorator';
 import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
 
 @ApiTags('Payment')
+@ApiBearerAuth()
 @Roles(RoleEnum.User)
 @Controller('payment')
 export class PaymentController {
