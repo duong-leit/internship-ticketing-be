@@ -29,7 +29,7 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 import { Response } from 'express';
 import { BankService } from '../service/bank.service';
 import { AuthService } from '../../auth/service/auth.service';
-import { Roles } from '../../auth/roles.decorator';
+import { Public, Roles } from '../../auth/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
 
 @ApiTags('User')
@@ -50,6 +50,7 @@ export class UserController {
   }
 
   @Post('bank')
+  @Roles(RoleEnum.User)
   async createBank(@Res() res: Response) {
     const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
     const dataInput = {
@@ -65,6 +66,7 @@ export class UserController {
   }
 
   @Get('/:bankId')
+  @Roles(RoleEnum.User)
   async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
     const response = await this.bankService.getBank({ id: bankId });
     transferResponse(res, response);
@@ -103,6 +105,7 @@ export class UserController {
     transferResponse(res, response);
   }
 
+  @Public()
   @Post('/register')
   @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
