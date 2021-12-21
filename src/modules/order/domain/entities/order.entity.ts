@@ -47,7 +47,7 @@ export class OrderEntity extends AppBaseEntity {
 
   @OneToMany(
     () => OrderDetailEntity,
-    (orderDetail: OrderDetailEntity) => orderDetail.id
+    (orderDetail: OrderDetailEntity) => orderDetail.order
   )
   orderDetail: OrderDetailEntity[];
 }

@@ -1,15 +1,16 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res } from '@nestjs/common';
 import { PaymentService } from '../service/payment.service';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { OrderRequestDto } from '../dto/payment.dto';
 import { Connection } from 'typeorm';
 import { transferResponse } from 'src/common/utils/transferResponse';
 import { Response } from 'express';
-import { Roles } from 'src/modules/auth/roles.decorator';
 import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
+import { Roles } from 'src/modules/auth/roles.decorator';
 
 @ApiTags('Payment')
 @Roles(RoleEnum.User)
+@ApiBearerAuth()
 @Controller('payment')
 export class PaymentController {
   constructor(
@@ -19,11 +20,7 @@ export class PaymentController {
 
   @Post()
   @ApiBody({ type: OrderRequestDto })
-  async checkoutTickets(
-    @Req() req,
-    @Body() data: OrderRequestDto,
-    @Res() res: Response
-  ) {
+  async checkoutTickets(@Body() data: OrderRequestDto, @Res() res: Response) {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -31,7 +28,6 @@ export class PaymentController {
       const orderId = await this.paymentService.handleCheckout(
         {
           ...data,
-          userId: req.user.userId,
         },
         queryRunner
       );

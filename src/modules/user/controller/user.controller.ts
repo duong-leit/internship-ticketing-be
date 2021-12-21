@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -11,6 +21,7 @@ import {
   CreateFacebookUserDto,
   CreateSystemUserDto,
   GetListUserDto,
+  UpdateUserDto,
   UserResponseDto,
 } from '../dto/user.dto';
 import { UserService } from '../service/user.service';
@@ -18,6 +29,8 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 import { Response } from 'express';
 import { BankService } from '../service/bank.service';
 import { AuthService } from '../../auth/service/auth.service';
+import { Public, Roles } from '../../auth/roles.decorator';
+import { RoleEnum } from '../../role/domain/enums/role.enum';
 
 @ApiTags('User')
 @Controller('user')
@@ -29,7 +42,15 @@ export class UserController {
     private readonly authService: AuthService
   ) {}
 
+  @Get('/info')
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async getUserInfo(@Res() res: Response) {
+    const response = await this.userServices.getUserInfo();
+    transferResponse(res, response);
+  }
+
   @Post('bank')
+  @Roles(RoleEnum.User)
   async createBank(@Res() res: Response) {
     const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
     const dataInput = {
@@ -45,6 +66,7 @@ export class UserController {
   }
 
   @Get('/:bankId')
+  @Roles(RoleEnum.User)
   async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
     const response = await this.bankService.getBank({ id: bankId });
     transferResponse(res, response);
@@ -75,7 +97,7 @@ export class UserController {
       pageIndex: data.pagination?.pageIndex,
     };
 
-    const response = await this.userServices.getListUser(
+    const response = await this.userServices.getUsers(
       { ...filter },
       { arrayRelation: ['role'] },
       { ...pagination }
@@ -83,6 +105,7 @@ export class UserController {
     transferResponse(res, response);
   }
 
+  @Public()
   @Post('/register')
   @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
@@ -129,6 +152,19 @@ export class UserController {
       createFacebookUserDto,
       userInfo.data
     );
+    transferResponse(res, response);
+  }
+
+  @Put('/:id')
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async updateUser(
+    @Param('id') id: string,
+    @Body() userDto: UpdateUserDto,
+    @Res() res: Response,
+    @Req() req
+  ) {
+    console.log(req.headers);
+    const response = await this.userServices.update(userDto, id);
     transferResponse(res, response);
   }
 }

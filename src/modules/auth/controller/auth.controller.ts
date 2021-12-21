@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import {
   ApiBody,
   ApiForbiddenResponse,
@@ -8,15 +8,12 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from '../service/auth.service';
-import {
-  FacebookLoginDto,
-  responseLoginDto,
-  UserLoginDto,
-} from '../infrastructure/dto/login.dto';
+import { FacebookLoginDto, responseLoginDto, UserLoginDto } from '../infrastructure/dto/login.dto';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { Response } from 'express';
 import { transferResponse } from '../../../common/utils/transferResponse';
-import { Public } from '../roles.decorator';
+import { Public, Roles } from '../roles.decorator';
+import { RoleEnum } from '../../role/domain/enums/role.enum';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -24,7 +21,17 @@ import { Public } from '../roles.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get()
+  @Roles(RoleEnum.Admin, RoleEnum.User)
+  async refreshToken(
+    @Res() res: Response
+  ){
+    const response = await this.authService.refreshToken();
+    transferResponse(res, response);
+  }
+
   @Post('system-login')
+  @Public()
   @Recaptcha({ action: 'login' })
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({
@@ -38,13 +45,14 @@ export class AuthController {
   @ApiBody({ type: UserLoginDto })
   async login(
     @Body() user: UserLoginDto,
-    @Res () res: Response
+    @Res() res: Response,
   ) {
     const response = await this.authService.systemLogin(user);
     transferResponse(res, response)
   }
 
   @Post('system-login-without-recaptcha')
+  @Public()
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({
     status: 401,
@@ -61,6 +69,7 @@ export class AuthController {
 
 
   @Post('fb-login')
+  @Public()
   @Recaptcha({ action: 'login' })
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({ status: 401, description: 'user is invalid' })
@@ -82,6 +91,7 @@ export class AuthController {
   }
 
   @Post('fb-login-without-recaptcha')
+  @Public()
   @ApiOkResponse({ type: responseLoginDto })
   @ApiUnauthorizedResponse({ status: 401, description: 'user is invalid' })
   @ApiForbiddenResponse({
