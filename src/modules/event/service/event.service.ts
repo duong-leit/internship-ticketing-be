@@ -21,21 +21,9 @@ export class EventService {
   private transferEntityToDto(
     event: EventEntity[], ignore:{ [key: string]: boolean }  | undefined = undefined
   ) {
-    return event.map((_user) => ({
-      // id: !ignore['id'] ? _user.id : undefined,
-      // createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
-      // updatedAt: !ignore['name'] ? _user.name : undefined,
-      // name: !ignore['name'] ? _user.name : undefined,
-      // email: !ignore['email'] ? _user.email : undefined,
-      // username: !ignore['username'] ? _user.username : undefined,
-      // birthday: !ignore['birthday'] ? _user.birthday : undefined,
-      // numberPhone: !ignore['phoneNumber'] ? _user.phoneNumber : undefined,
-      // password: !ignore['password'] ? _user.password : undefined,
-      // gender: !ignore['gender'] ? _user.gender : undefined,
-      // avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
-      // isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
-      // role: !ignore['role'] ? _user.role?.name : undefined,
-      // roleId: !ignore['roleId'] ? _user.roleId : undefined
+    return event.map((_event) => ({
+      id: !ignore['id'] ? _event.id : undefined,
+      
     }));
   }
 
@@ -114,10 +102,8 @@ export class EventService {
       take: take,
       skip: skip === 0 ? 0 : skip * take,
     });
-
     //console.log(Object.getOwnPropertyNames(UserResponseDto));
     //console.log(result);
-    
     return {
       statusCode: 200,
       data: result,
@@ -129,10 +115,38 @@ export class EventService {
       },
     };
   }
-    // return await this.eventRepository.findOne({
-    //   relations: ['eventCategory'],
-    //   where: {categoryId: categoryId}})
-  //}
+
+  async getAll(
+    paging: { pageSize: number; pageIndex: number } | undefined = {
+      pageSize: 10,
+      pageIndex: 1,
+    }
+  ) {
+    const take = paging.pageSize || 10;
+    const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
+    //console.log(dataCheck);
+
+    const [result, total] = await this.eventRepository.findAndCount({
+      //relations: relations?.arrayRelation || undefined,
+      relations: ['category'],
+      where: {
+        isDeleted: false,
+      },
+      // order: { name: 'DESC' },
+      take: take,
+      skip: skip === 0 ? 0 : skip * take,
+    });
+    return {
+      statusCode: 200,
+      data: result,
+      //data: UserService.transferEntityToDto(result),
+      pagination: {
+        _totalPage: Math.ceil(total / take),
+        _pageSize: take,
+        _pageIndex: skip + 1,
+      },
+    };
+  }
 
   private async responeErrorMessage(
     statusCode: number,
@@ -144,22 +158,25 @@ export class EventService {
     };
   }
 
-  async createEvent(eventInfo: EventDto): Promise<EventEntity> {
+  async createEvent(eventInfo: EventDto): Promise<EventResponeDto> {
     eventInfo.userId = this.req.user.userId;
-    console.log(eventInfo.userId);
+    console.log("UserId: ", eventInfo.userId);
 
     const newEvent = this.eventRepository.create(eventInfo);
     const event = await this.eventRepository.save(newEvent);
-    if (!event) return; //this.responeErrorMessage(400, 'Cannot create new event');
-    // return this.responeSuccessMessage(201, 'Event created successfully', {
-    //   id: event.id,
-    // });
-    return event;
+    if (!event) return;//this.responeErrorMessage(400, 'Cannot create new event');
+    return {
+      statusCode: 200,
+      data: {
+        id: event.id
+      }
+    }
   }
 
   async updateAvailableTickets(
     eventId: string,
-    ticketAmount: number
+    ticketAmount: number,
+    queryRunner: QueryRunner
   ): Promise<EventEntity> {
     const event = await this.getEventByID(eventId);
     if (!event) {

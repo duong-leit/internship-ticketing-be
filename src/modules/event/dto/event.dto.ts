@@ -23,9 +23,9 @@ export class EventDto{
     categoryId: string;
 
     //@IsNotEmpty()
-    @IsString()
-    @ApiProperty()
-    userId: string;
+    //@IsString()
+    //@ApiProperty()
+    userId?: string;
 
     @IsNotEmpty()
     @ApiProperty()
@@ -87,9 +87,9 @@ export class EventDto{
 }
 
 export class EventResponeDto{
-    statusCode: number;
-    message: string;
-    data?: EventEntity;
+    statusCode?: number;
+    message?: string;
+    data?: Object;
 }
 
 export class PaginationDto{
