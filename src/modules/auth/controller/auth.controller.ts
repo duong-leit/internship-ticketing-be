@@ -15,9 +15,9 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 import { Public, Roles } from '../roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
 
-
 @ApiTags('Auth')
 @Controller('auth')
+@Public()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

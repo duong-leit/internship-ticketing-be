@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { EventEntity } from "../domain/entities/event.entity";
 
 export class EventDto{
     @IsNotEmpty()
@@ -21,10 +22,10 @@ export class EventDto{
     @ApiProperty()
     categoryId: string;
 
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty()
-    userId: string;
+    //@IsNotEmpty()
+    //@IsString()
+    //@ApiProperty()
+    userId?: string;
 
     @IsNotEmpty()
     @ApiProperty()
@@ -86,7 +87,14 @@ export class EventDto{
 }
 
 export class EventResponeDto{
-    statusCode: number;
-    message: string;
-    data?: object;
+    statusCode?: number;
+    message?: string;
+    data?: Object;
+}
+
+export class PaginationDto{
+    @ApiProperty()
+    pageSize: number;
+    @ApiProperty()
+    pageIndex: number;
 }
