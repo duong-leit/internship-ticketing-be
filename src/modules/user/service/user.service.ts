@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Scope,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
@@ -14,6 +20,8 @@ import { UserEntity } from '../domain/entities/user.entity';
 import { Like } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../auth/service/auth.service';
+import { WalletService } from './wallet.service';
+import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -24,7 +32,8 @@ export class UserService {
     private readonly roleRepository: RoleRepository,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => AuthService))
-    private authService: AuthService
+    private authService: AuthService,
+    private walletService: WalletService
   ) {}
 
   private static transferEntityToDto(
@@ -119,22 +128,21 @@ export class UserService {
     };
   }
 
-  private async saveUser(newData: IUser) {
+  private async saveUser(newData: IUser): Promise<UserEntity> {
     const result = await this.getUser({ email: newData.email });
 
-    if (result.statusCode !== 404)
-      return { statusCode: 400, message: 'Email is already taken' };
+    if (!result)
+      //.statusCode !== 404
+      throw new BadRequestException('Email is already taken'); //{ statusCode: 400, message: 'Email is already taken' };
 
     newData.roleId = (await this.roleRepository.findOne({ name: 'User' })).id;
 
     const user = await this.userRepository.save(newData);
-    if (!user) return { statusCode: 500, message: 'Server Error' };
-    return { statusCode: 200, message: 'Create successful' };
+    //if (!user) return { statusCode: 500, message: 'Server Error' };
+    return user; //{ statusCode: 200, message: 'Create successful' };
   }
 
-  async createSystemUser(
-    userInfo: CreateSystemUserDto
-  ): Promise<UserResponseDto> {
+  async createSystemUser(userInfo: CreateSystemUserDto) {
     const userInformation: IUser = {
       name: userInfo.name,
       username: userInfo.email,
@@ -142,7 +150,9 @@ export class UserService {
       isSocial: false,
       password: await bcrypt.hash(userInfo.password, SALT_OR_ROUNDS),
     };
-    return await this.saveUser(userInformation);
+    const newUser = await this.saveUser(userInformation);
+    await this.walletService.createWallet(newUser.id);
+    return { statusCode: 200, message: 'Create successful' };
   }
 
   async createFacebookUser(createFacebookUserDto, userInfo) {
@@ -161,7 +171,8 @@ export class UserService {
       isSocial: true,
     };
     const result = await this.saveUser(newUser);
-    if (result.statusCode !== 200) return result;
+    await this.walletService.createWallet(newUser.id);
+    // if (result.statusCode !== 200) return result;
 
     return {
       statusCode: 200,
@@ -170,7 +181,11 @@ export class UserService {
         email: newUser.email,
         avatarUrl: newUser.avatarUrl,
       },
-      accessToken: this.authService.generateJWTToken(newUser),
+      accessToken: this.authService.generateJWTToken({
+        id: result.id,
+        email: result.email,
+        role: 'User',
+      }),
     };
   }
 

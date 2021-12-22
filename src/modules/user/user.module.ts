@@ -14,6 +14,8 @@ import {
 import { BankService } from './service/bank.service';
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { ShareModule } from '../share/share.module';
+import { WalletService } from './service/wallet.service';
 
 @Module({
   imports: [
@@ -26,9 +28,10 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule.registerAsync(jwtModuleOption),
     RoleModule,
     forwardRef(() => AuthModule),
+    ShareModule,
   ],
   controllers: [UserController],
-  providers: [UserService, BankService],
+  providers: [UserService, BankService, WalletService],
   exports: [TypeOrmModule, UserService, BankService],
 })
 export class UserModule {}

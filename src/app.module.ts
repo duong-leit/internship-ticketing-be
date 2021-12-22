@@ -17,6 +17,7 @@ import { HttpExceptionFilter } from './exception-filters/http-exception.filter';
 import { APP_GUARD } from '@nestjs/core';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
+import { ShareModule } from './modules/share/share.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { JwtAuthGuard } from './modules/auth/guards/auth.guard';
     PaymentModule,
     EventModule,
     AuthModule,
+    ShareModule,
   ],
   providers: [
     {
