@@ -32,7 +32,7 @@ export class OrderController {
   ) {
     const data: IOrder = await this.orderService.getOrders(
       undefined,
-      ['event', 'orderDetail'],
+      ['event', 'orderDetail', 'bank'],
       page,
       limit
     );

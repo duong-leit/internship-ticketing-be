@@ -65,6 +65,13 @@ export class UserController {
     transferResponse(res, response);
   }
 
+  @Get('bank')
+  @Roles(RoleEnum.User)
+  async getMyBanks(@Res() res: Response) {
+    const response = await this.bankService.getBanks();
+    transferResponse(res, response);
+  }
+
   @Get('/:bankId')
   @Roles(RoleEnum.User)
   async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
