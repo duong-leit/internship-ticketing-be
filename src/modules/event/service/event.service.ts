@@ -1,5 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { QueryRunner } from 'typeorm';
@@ -12,8 +11,7 @@ import { EventRepository } from '../infrastructure/event.repository';
 export class EventService {
   constructor(
     @InjectRepository(EventRepository)
-    private readonly eventRepository: EventRepository,
-    @Inject(REQUEST) private readonly req: any //@Inject(Response) private readonly res: any
+    private readonly eventRepository: EventRepository
   ) {}
 
   private transferEntityToDto(
@@ -38,7 +36,7 @@ export class EventService {
   }
 
   async getEventByCreator(
-    //data: string,
+    userId: string,
     paging: PaginationDto | undefined = {
       pageSize: 10,
       pageIndex: 1,
@@ -46,13 +44,9 @@ export class EventService {
   ) {
     if (paging.pageIndex == 0) paging.pageIndex = 1;
     if (paging.pageSize == 0) paging.pageSize = 10;
-    // const dataCheck = {
-    //   [Object.keys(data)[0]]: data[Object.keys(data)[0]],
-    // };
+
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
-    //console.log(dataCheck);
-    const userId = this.req.user.userId;
 
     const [result, total] = await this.eventRepository.findAndCount({
       relations: ['category'],
@@ -100,8 +94,6 @@ export class EventService {
       take: take,
       skip: skip === 0 ? 0 : skip * take,
     });
-    //console.log(Object.getOwnPropertyNames(UserResponseDto));
-    //console.log(result);
     return {
       statusCode: 200,
       data: result,
@@ -122,7 +114,6 @@ export class EventService {
   ) {
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
-    //console.log(dataCheck);
 
     const [result, total] = await this.eventRepository.findAndCount({
       //relations: relations?.arrayRelation || undefined,
@@ -157,9 +148,6 @@ export class EventService {
   }
 
   async createEvent(eventInfo: EventDto): Promise<EventResponeDto> {
-    eventInfo.userId = this.req.user.userId;
-    console.log('UserId: ', eventInfo.userId);
-
     const newEvent = this.eventRepository.create(eventInfo);
     const event = await this.eventRepository.save(newEvent);
     if (!event) return; //this.responeErrorMessage(400, 'Cannot create new event');
@@ -200,23 +188,22 @@ export class EventService {
     eventId: string,
     eventInfo: EventDto
   ): Promise<EventResponeDto> {
-    console.log(this.req.user);
-    console.log(this.req);
-
     const event = await this.getEventByID(eventId);
     if (!event) {
       return this.responeErrorMessage(404, 'Event not Found');
     }
-    if (event.userId != this.req.user.userId) {
+
+    if (event.userId != eventInfo.userId) {
       return this.responeErrorMessage(401, 'Permission denied');
     }
 
     //update Event
-    this.eventRepository.save({
+    const updatedEvent = await this.eventRepository.save({
       ...event, //existed Info
       ...eventInfo, //Update Info
     });
-    return; //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
+    return { statusCode: 200, data: { id: updatedEvent.id } };
+    //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
     //console.log(error);
     //this.responeErrorMessage(400, "Cannot update event");
   }

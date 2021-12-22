@@ -1,5 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BankEntity } from '../domain/entities/bank.entity';
 import { BankRequestDto } from '../dto/bank.dto';
@@ -9,16 +8,14 @@ import { BankRepository } from '../infrastructure/bank.repository';
 export class BankService {
   constructor(
     @InjectRepository(BankRepository)
-    private readonly bankRepository: BankRepository,
-    @Inject(REQUEST) private readonly request
+    private readonly bankRepository: BankRepository
   ) {}
 
   async getBank(
     data: { [key: string]: string | number } | undefined = undefined
   ) {
-    const userId = this.request.user.userId;
     const user = await this.bankRepository.findOne({
-      where: { ...data, userId },
+      where: { ...data },
     });
     return { statusCode: 200, data: user };
   }
@@ -26,9 +23,8 @@ export class BankService {
   async getBanks(
     data: { [key: string]: string | number } | undefined = undefined
   ) {
-    const userId = this.request.user.userId;
     const user = await this.bankRepository.find({
-      where: { ...data, userId },
+      where: { ...data },
     });
     return { statusCode: 200, data: user };
   }
