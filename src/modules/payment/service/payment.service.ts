@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { EventService } from 'src/modules/event/service/event.service';
 import { OrderService } from 'src/modules/order/service/order.service';
@@ -6,7 +11,7 @@ import { BankService } from 'src/modules/user/service/bank.service';
 import { QueryRunner } from 'typeorm';
 import { OrderStatusEnum } from '../../order/domain/enums/orderStatus.enum';
 import { OrderRequestDto } from '../dto/payment.dto';
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class PaymentService {
   constructor(
     private readonly orderService: OrderService,
@@ -14,25 +19,26 @@ export class PaymentService {
     private readonly bankService: BankService
   ) {}
 
-  async handleCheckout(data: OrderRequestDto, queryRunner: QueryRunner) {
+  async handleCheckout(
+    data: OrderRequestDto,
+    buyerId: string,
+    queryRunner: QueryRunner
+  ) {
     const isValid = await this.orderService.validateNewOrder(
-      data.userId,
+      buyerId,
       data.eventId,
       data.amount
     );
     if (!isValid) {
       throw new BadRequestException(ErrorCodeEnum.INVALID_DATA);
     }
-    let userBank: any = await this.bankService.getBank({
-      ...data.bank,
+    const userBank: any = await this.bankService.getBank({
+      id: data.bankId,
     });
     if (!userBank.data) {
-      userBank = await this.bankService.createBank(
-        {
-          ...data.bank,
-        }
-      );
+      throw new NotFoundException(ErrorCodeEnum.NOT_FOUND_BANK);
     }
+
     const event = await this.eventService.getEventByID(data.eventId);
     if (!event) {
       throw new BadRequestException(ErrorCodeEnum.NOT_FOUND_EVENT);
@@ -41,7 +47,7 @@ export class PaymentService {
     const newOrder = await this.orderService.createOrder(
       {
         eventId: data.eventId,
-        buyerId: data.userId,
+        buyerId: buyerId,
         status: OrderStatusEnum.Done,
         orderDate: new Date().toISOString(),
         paymentDate: new Date().toISOString(),

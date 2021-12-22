@@ -1,19 +1,20 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Queue } from 'bull';
 import { EventService } from 'src/modules/event/service/event.service';
 import { QueryRunner } from 'typeorm';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { OrderDetailEntity } from '../domain/entities/orderDetail.entity';
 import {
-  IOrder,
+  // IOrder,
   IOrderDetail,
 } from '../domain/interfaces/IOrderDetail.interface';
 import { ICreateOrderDetails } from '../domain/interfaces/ITicket.interface';
 import { OrderRepository } from '../infrastructure/repositories/order.repository';
 import { OrderDetailRepository } from '../infrastructure/repositories/orderDetail.repository';
+// import { Request } from 'express';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
@@ -27,13 +28,13 @@ export class OrderService {
 
   async getOrders(
     condition?: { [field: string]: string | number },
-    relations: string[] | undefined = ['event'],
+    relations: string[] | undefined = ['event', 'orderDetail'],
     page?: number,
     limit?: number
-  ): Promise<IOrder> {
+  ): Promise<any> {
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       relations: relations || undefined,
-      where: condition,
+      where: { ...condition },
       take: limit,
       skip: page ? (page - 1) * limit : 0,
     });
@@ -41,8 +42,8 @@ export class OrderService {
       items: orders,
       meta: {
         totalItems: totalItems,
-        itemsPerPage: limit,
-        currentPage: page,
+        itemsPerPage: Number(limit),
+        currentPage: Number(page),
       },
     };
   }
@@ -50,8 +51,8 @@ export class OrderService {
   async getOrderDetails(
     userId: string,
     orderId: string,
-    page?: number,
-    limit?: number
+    page: number,
+    limit: number
   ): Promise<IOrderDetail> {
     const order = await this.orderRepository.findOne({
       where: { buyerId: userId, id: orderId },
@@ -86,7 +87,9 @@ export class OrderService {
       -Number(data.amount),
       queryRunner
     );
+    //tạo 1 row trong table order
     const order = await queryRunner.manager.save(OrderEntity, data);
+    //tạo detail trong table orderDetail
     this.createOrderDetails(
       {
         amount: Number(data.amount),

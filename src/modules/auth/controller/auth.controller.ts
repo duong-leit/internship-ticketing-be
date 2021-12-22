@@ -8,25 +8,28 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from '../service/auth.service';
-import { FacebookLoginDto, responseLoginDto, UserLoginDto } from '../infrastructure/dto/login.dto';
+import {
+  FacebookLoginDto,
+  responseLoginDto,
+  UserLoginDto,
+} from '../infrastructure/dto/login.dto';
 import { Recaptcha } from '@nestlab/google-recaptcha';
 import { Response } from 'express';
 import { transferResponse } from '../../../common/utils/transferResponse';
-import { Public, Roles } from '../roles.decorator';
+import { Public, Roles } from '../decorators/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
-
+import { User } from '../decorators/user.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
+// @Public()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get()
   @Roles(RoleEnum.Admin, RoleEnum.User)
-  async refreshToken(
-    @Res() res: Response
-  ){
-    const response = await this.authService.refreshToken();
+  async refreshToken(@Res() res: Response, @User('userId') userId: string) {
+    const response = await this.authService.refreshToken(userId);
     transferResponse(res, response);
   }
 
@@ -43,12 +46,9 @@ export class AuthController {
     description: 'google recaptcha',
   })
   @ApiBody({ type: UserLoginDto })
-  async login(
-    @Body() user: UserLoginDto,
-    @Res() res: Response,
-  ) {
+  async login(@Body() user: UserLoginDto, @Res() res: Response) {
     const response = await this.authService.systemLogin(user);
-    transferResponse(res, response)
+    transferResponse(res, response);
   }
 
   @Post('system-login-without-recaptcha')
@@ -61,12 +61,11 @@ export class AuthController {
   @ApiBody({ type: UserLoginDto })
   async loginWithoutRecaptcha(
     @Body() user: UserLoginDto,
-    @Res () res: Response
+    @Res() res: Response
   ) {
     const response = await this.authService.systemLogin(user);
-    transferResponse(res, response)
+    transferResponse(res, response);
   }
-
 
   @Post('fb-login')
   @Public()
@@ -82,10 +81,7 @@ export class AuthController {
     description: 'google recaptcha',
   })
   @ApiBody({ type: FacebookLoginDto })
-  async facebookLogin(
-    @Body() user: FacebookLoginDto,
-    @Res() res: Response
-  ) {
+  async facebookLogin(@Body() user: FacebookLoginDto, @Res() res: Response) {
     const response = await this.authService.facebookLogin(user);
     transferResponse(res, response);
   }

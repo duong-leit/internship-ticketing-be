@@ -2,7 +2,11 @@ import { forwardRef, Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleRepository } from 'src/modules/role/infrastructure/role.repository';
 import { IUser } from '../domain/interfaces/IUser.interface';
-import { CreateSystemUserDto, UpdateUserDto, UserResponseDto } from '../dto/user.dto';
+import {
+  CreateSystemUserDto,
+  UpdateUserDto,
+  UserResponseDto,
+} from '../dto/user.dto';
 import { UserRepository } from '../infrastructure/user.repository';
 import * as bcrypt from 'bcrypt';
 import { SALT_OR_ROUNDS } from 'src/common/constant';
@@ -10,9 +14,8 @@ import { UserEntity } from '../domain/entities/user.entity';
 import { Like } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../../auth/service/auth.service';
-import { REQUEST } from '@nestjs/core';
 
-@Injectable({scope: Scope.REQUEST})
+@Injectable({ scope: Scope.REQUEST })
 export class UserService {
   constructor(
     @InjectRepository(UserRepository)
@@ -21,14 +24,13 @@ export class UserService {
     private readonly roleRepository: RoleRepository,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => AuthService))
-    private authService: AuthService,
-    @Inject(REQUEST) private readonly request,
+    private authService: AuthService
   ) {}
 
   private static transferEntityToDto(
     users: UserEntity[],
     ignore: { [key: string]: boolean } | undefined = undefined
-  ){
+  ) {
     return users.map((_user) => ({
       id: !ignore['id'] ? _user.id : undefined,
       createdAt: !ignore['createdAt'] ? _user.createdAt : undefined,
@@ -47,13 +49,13 @@ export class UserService {
     }));
   }
 
-  async getUserInfo(){
-    const result = await this.getUser({id: this.request.user.userId});
-    if(!result.data) return { statusCode: 404, message: 'Notfound' };
+  async getUserInfo(userId: string) {
+    const result = await this.getUser({ id: userId });
+    if (!result.data) return { statusCode: 404, message: 'Notfound' };
     return {
       statusCode: 200,
-      data: result.data
-    }
+      data: result.data,
+    };
   }
 
   async getUser(
@@ -175,27 +177,30 @@ export class UserService {
   async update(userDto: UpdateUserDto){
     const result = (await this.getUser({id: this.request.user.userId}));
     const user = result.data;
-    if(!user) return{ statusCode: 400, message: 'User Error' }
-    const role = (await this.roleRepository.findOne({name: user.role}))
+    if (!user) return { statusCode: 400, message: 'User Error' };
+    const role = await this.roleRepository.findOne({ name: user.role });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { createdAt, updatedAt, ...res } = user;
     const newUser: UserEntity = await this.userRepository.save({
       ...res,
       role: role,
-      name: userDto.name? userDto.name : user.name,
-      password: (userDto.password===user.password) ? user.password : await bcrypt.hash(userDto.password, SALT_OR_ROUNDS),
-      birthday: userDto.birthday? userDto.birthday : user.birthday,
+      name: userDto.name ? userDto.name : user.name,
+      password:
+        userDto.password === user.password
+          ? user.password
+          : await bcrypt.hash(userDto.password, SALT_OR_ROUNDS),
+      birthday: userDto.birthday ? userDto.birthday : user.birthday,
       gender: userDto.gender ? userDto.gender : user.gender,
-      phoneNumber: userDto.phoneNumber? userDto.phoneNumber : user.phoneNumber,
+      phoneNumber: userDto.phoneNumber ? userDto.phoneNumber : user.phoneNumber,
     });
 
-    if(!newUser){
-      return{ statusCode: 500, message: 'Server Error' }
+    if (!newUser) {
+      return { statusCode: 500, message: 'Server Error' };
     }
     return {
       statusCode: 200,
-      message: 'Update Successfully'
-    }
+      message: 'Update Successfully',
+    };
   }
 
   generateJWTToken(data: any): string {

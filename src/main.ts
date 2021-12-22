@@ -16,6 +16,7 @@ async function bootstrap() {
   // swagger config
   const config = new DocumentBuilder()
     .setTitle('NTF Ticketing')
+    .addBearerAuth()
     .setVersion('1.0')
     .addBearerAuth()
     .build();

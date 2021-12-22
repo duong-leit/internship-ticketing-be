@@ -6,60 +6,83 @@ import {
   Post,
   Put,
   Query,
-  Request,
   Response,
 } from '@nestjs/common';
 import { EventService } from '../service/event.service';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { EventDto, EventResponeDto } from '../dto/event.dto';
+import { ApiBearerAuth, ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { EventDto, PaginationDto } from '../dto/event.dto';
 import { transferResponse } from 'src/common/utils/transferResponse';
+import { Public, Roles } from 'src/modules/auth/decorators/roles.decorator';
+import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
+import { User } from 'src/modules/auth/decorators/user.decorator';
 
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @Post('/create')
+  @Public()
+  @Get()
+  @ApiQuery({ type: PaginationDto })
+  async getAll(@Response() res: any, @Query() pagination: PaginationDto) {
+    const events = await this.eventService.getAll(pagination);
+    transferResponse(res, events);
+  }
+
+  @Roles(RoleEnum.User)
+  @Get('/myEvent')
+  @ApiBearerAuth()
+  @ApiQuery({ type: PaginationDto })
+  async getMyEvent(
+    @Query() pagination: PaginationDto,
+    @Response() res: any,
+    @User('id') userId: string
+  ) {
+    const events = await this.eventService.getEventByCreator(
+      userId,
+      pagination
+    );
+    transferResponse(res, { statusCode: 200, data: events });
+  }
+
+  @Public()
+  @Get('/:id')
+  async getEventById(@Param('id') eventId: string, @Response() res: any) {
+    const eventDetail = await this.eventService.getEventByID(eventId);
+    transferResponse(res, { statusCode: 200, data: eventDetail });
+  }
+
+  @Roles(RoleEnum.User)
+  @Post()
+  @ApiBearerAuth()
   @ApiBody({ type: EventDto })
   async createEvent(
     @Body() eventInfo: EventDto,
     @Response() res: any,
-    @Request() req: any
+    @User('userId') userId: string
   ) {
-    const response = await this.eventService.createEvent(eventInfo);
-    transferResponse(res, response);
+    console.log('userId', userId);
+    const newEvent = await this.eventService.createEvent({
+      ...eventInfo,
+      userId,
+    });
+    transferResponse(res, newEvent);
   }
 
-  @Put('/update/:eventId')
-  //@ApiBody()
-  //Guard
-  //Role
+  @Roles(RoleEnum.User)
+  @Put('/:eventId')
+  @ApiBody({ type: EventDto })
+  @ApiBearerAuth()
   async updateEvent(
-    @Request() req: any,
     @Body() eventInfo: EventDto,
     @Query('eventId') eventId: string,
+    @User('userId') userId: string,
     @Response() res: any
   ) {
-    const user = {
-      userId: '22e60f44-f4ed-4a70-923d-c76ed756a31d',
-      email: '123@gmail.com',
-      role: 'User',
-    };
-    //
-    const response = await this.eventService.updateEvent(
-      eventId,
-      eventInfo,
-      user
-    );
+    const response = await this.eventService.updateEvent(eventId, {
+      ...eventInfo,
+      userId,
+    });
     transferResponse(res, response);
-  }
-
-  @Get('/myEvent')
-  async getMyEvent() {
-    const user = {
-      userId: '22e60f44-f4ed-4a70-923d-c76ed756a31d',
-      email: '123@gmail.com',
-      role: 'User',
-    };
   }
 }

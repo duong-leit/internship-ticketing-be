@@ -8,16 +8,14 @@ import {
   FacebookLoginDto,
   UserLoginDto,
 } from '../infrastructure/dto/login.dto';
-import { REQUEST } from '@nestjs/core';
 
-@Injectable({scope: Scope.REQUEST})
+@Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly fbService: FacebookAuthService,
     @Inject(forwardRef(() => UserService))
-    private readonly userService: UserService,
-    @Inject(REQUEST) private readonly request,
+    private readonly userService: UserService
   ) {}
 
   async systemLogin(data: UserLoginDto) {
@@ -40,8 +38,8 @@ export class AuthService {
     };
   }
 
-  async refreshToken(){
-    const result = await this.userService.getUser({id: this.request.user.userId});
+  async refreshToken(userId: string) {
+    const result = await this.userService.getUser({ id: userId });
     if (result.statusCode === 404)
       return { statusCode: 400, message: 'User have been deleted' };
     return {
@@ -73,7 +71,7 @@ export class AuthService {
           birthday: userInfo.birthday,
         },
       };
-    }catch{
+    } catch {
       return {
         statusCode: 400,
         message: 'Token Error',

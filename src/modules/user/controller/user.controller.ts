@@ -19,9 +19,10 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 import { Response } from 'express';
 import { BankService } from '../service/bank.service';
 import { AuthService } from '../../auth/service/auth.service';
-import { Roles } from '../../auth/roles.decorator';
+import { Public, Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
 import { BankRequestDto } from '../dto/bank.dto';
+import { User } from 'src/modules/auth/decorators/user.decorator';
 
 @ApiTags('User')
 @Controller('user')
@@ -32,10 +33,12 @@ export class UserController {
     private readonly authService: AuthService
   ) {}
 
+
   @Get('info')
+  @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async getUserInfo(@Res() res: Response) {
-    const response = await this.userServices.getUserInfo();
+  async getUserInfo(@Res() res: Response, @User('userId') userId: string) {
+    const response = await this.userServices.getUserInfo(userId);
     transferResponse(res, response);
   }
 
@@ -78,6 +81,8 @@ export class UserController {
   }
 
   @Post()
+  @Roles(RoleEnum.Admin)
+  @ApiBearerAuth()
   @ApiBody({
     type: GetListUserDto,
   })
@@ -110,6 +115,8 @@ export class UserController {
     transferResponse(res, response);
   }
 
+
+  @Public()
   @Post('register')
   @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
@@ -132,6 +139,7 @@ export class UserController {
     transferResponse(res, response);
   }
 
+  @Public()
   @Post('/facebookRegister')
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
