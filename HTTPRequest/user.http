@@ -1,0 +1,14 @@
+GET {{HOST}}user/bank?pageSize=3&pageIndex=0
+Authorization: Bearer {{auth_token}}
+###
+GET {{HOST}}user/bank
+Authorization: Bearer {{auth_token}}
+###
+POST {{HOST}}user/bank
+Content-Type: application/json
+###
+#{
+#  "price": 200,
+#  "title": "Lion"
+#}
+###

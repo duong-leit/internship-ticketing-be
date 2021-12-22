@@ -32,6 +32,7 @@ export class AuthService {
       data: {
         name: result.data.name,
         avatarUrl: result.data.avatarUrl,
+        role: result.data.role
       },
       accessToken: this.generateJWTToken(result.data),
     };
@@ -46,6 +47,7 @@ export class AuthService {
       data: {
         name: result.data.name,
         avatarUrl: result.data.avatarUrl,
+        role: result.data.role
       },
       accessToken: this.generateJWTToken(result.data),
     };
@@ -98,6 +100,7 @@ export class AuthService {
           name: userInfo.name,
           email: userInfo.email ? userInfo.email : null,
           avatarUrl: avatarUrl,
+          role: result.data.role
         },
         accessToken: accessToken,
       };

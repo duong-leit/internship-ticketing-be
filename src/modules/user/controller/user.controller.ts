@@ -1,17 +1,6 @@
+import { Body, Controller, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  Req,
-  Res,
-} from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
+  ApiBadRequestResponse, ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiHeader,
@@ -32,6 +21,7 @@ import { BankService } from '../service/bank.service';
 import { AuthService } from '../../auth/service/auth.service';
 import { Public, Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
+import { BankRequestDto } from '../dto/bank.dto';
 import { User } from 'src/modules/auth/decorators/user.decorator';
 
 @ApiTags('User')
@@ -40,11 +30,11 @@ export class UserController {
   constructor(
     private userServices: UserService,
     private bankService: BankService,
-    // @Inject(forwardRef(()=>AuthService))
     private readonly authService: AuthService
   ) {}
 
-  @Get('/info')
+
+  @Get('info')
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
   async getUserInfo(@Res() res: Response, @User('userId') userId: string) {
@@ -54,39 +44,40 @@ export class UserController {
 
   @Post('bank')
   @ApiBearerAuth()
-  @Roles(RoleEnum.User)
-  async createBank(@Res() res: Response) {
-    const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
-    const dataInput = {
-      name: 'Viettinbank',
-      cardHolderName: 'Ha Anh Khoa',
-      creditNumber: '1231 2312 3213',
-    };
-    const response = await this.bankService.createBank({
-      userId,
-      ...dataInput,
-    });
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async createBank(
+    @Res() res: Response,
+    @Body() bankDto: BankRequestDto
+  ) {
+    const response = await this.bankService.createBank(bankDto);
+    if (response['error']) {
+      transferResponse(res, { statusCode: 400, message: response['message'] });
+    }
+    transferResponse(res, { statusCode: 200, data: response });
+  }
+
+  @Get('bank/:bankId')
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async getBankById(@Param('bank ID') bankId: string, @Res() res: Response) {
+    const response = await this.bankService.getBank({ id: bankId });
     transferResponse(res, response);
   }
 
   @Get('bank')
   @ApiBearerAuth()
-  @Roles(RoleEnum.User)
-  async getMyBanks(@Res() res: Response, @User('userId') userId: string) {
-    const response = await this.bankService.getBanks({ userId });
-    transferResponse(res, response);
-  }
-
-  @Get('/:bankId')
-  @ApiBearerAuth()
-  @Roles(RoleEnum.User)
-  async getBankById(
-    @Query('bank ID') bankId: string,
-    @Res() res: Response,
-    @User('userId') userId: string
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async getBanks(
+    @Query('pageSize') pageSize: number,
+    @Query('pageIndex') pageIndex: number,
+    @Res() res: Response
   ) {
-    const response = await this.bankService.getBank({ id: bankId, userId });
-    transferResponse(res, response);
+    const response = await this.bankService.getBanks({
+      pageSize, pageIndex
+    });
+    if (response['error']) {
+      transferResponse(res, { statusCode: 400, message: response['message'] });
+    }
+    transferResponse(res, { statusCode: 200, ...response });
   }
 
   @Post()
@@ -124,8 +115,9 @@ export class UserController {
     transferResponse(res, response);
   }
 
+
   @Public()
-  @Post('/register')
+  @Post('register')
   @Recaptcha({ action: 'register' })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
@@ -175,16 +167,10 @@ export class UserController {
     transferResponse(res, response);
   }
 
-  @Put('/:id')
+  @Put()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async updateUser(
-    @Param('id') id: string,
-    @Body() userDto: UpdateUserDto,
-    @Res() res: Response,
-    @Req() req
-  ) {
-    console.log(req.headers);
-    const response = await this.userServices.update(userDto, id);
+  async updateUser(@Body() userDto: UpdateUserDto, @Res() res: Response) {
+    const response = await this.userServices.update(userDto);
     transferResponse(res, response);
   }
 }

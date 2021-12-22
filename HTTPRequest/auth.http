@@ -1,0 +1,9 @@
+
+POST {{HOST}}auth/system-login-without-recaptcha
+Content-Type: application/json
+
+{
+  "username": "khoa@gmail.com",
+  "password": "abcd"
+}
+###
