@@ -54,8 +54,12 @@ export class UserController {
   @Post('bank')
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async createBank(@Res() res: Response, @Body() bankDto: BankRequestDto) {
-    const response = await this.bankService.createBank(bankDto);
+  async createBank(
+    @Res() res: Response,
+    @Body() bankDto: BankRequestDto,
+    @User('userId') userId: string
+  ) {
+    const response = await this.bankService.createBank(userId, bankDto);
     if (response['error']) {
       transferResponse(res, { statusCode: 400, message: response['message'] });
     }
@@ -75,9 +79,10 @@ export class UserController {
   async getBanks(
     @Query('pageSize') pageSize: number,
     @Query('pageIndex') pageIndex: number,
-    @Res() res: Response
+    @Res() res: Response,
+    @User('userId') userId: string
   ) {
-    const response = await this.bankService.getBanks({
+    const response = await this.bankService.getBanks(userId, {
       pageSize,
       pageIndex,
     });
