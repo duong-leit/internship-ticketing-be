@@ -34,6 +34,7 @@
     "@nestjs/swagger": "5.1.5",
     "@nestjs/typeorm": "8.0.2",
     "@nestlab/google-recaptcha": "2.1.2",
+    "@tatumio/tatum": "^1.30.3",
     "bcrypt": "5.0.1",
     "bull": "3.29.3",
     "class-transformer": "0.5.1",

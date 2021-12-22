@@ -24,7 +24,6 @@ export class OrderController {
     @Query() { page = 1, limit = 5 }: QueryPanigateDto,
     @User('userId') userId: string
   ) {
-    console.log('reqdasdasdas', userId);
     const data: IOrder = await this.orderService.getOrders(
       { buyerId: userId },
       ['event', 'orderDetail', 'bank'],
@@ -32,7 +31,6 @@ export class OrderController {
       limit
     );
     const responseData: OrderResponseDto = { statusCode: 200, data: data };
-
     transferResponse(res, responseData);
   }
 }

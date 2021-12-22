@@ -33,15 +33,25 @@ import { Public, Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
 import { BankRequestDto } from '../dto/bank.dto';
 import { User } from 'src/modules/auth/decorators/user.decorator';
+import { WalletService } from '../service/wallet.service';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(
     private userServices: UserService,
+    private walletServices: WalletService,
     private bankService: BankService,
     private readonly authService: AuthService
   ) {}
+
+  @Get()
+  @ApiBearerAuth()
+  @Roles(RoleEnum.User, RoleEnum.Admin)
+  async test(@User('userId') userId: string) {
+    console.log('userId', userId);
+    return await this.walletServices.createWallet(userId);
+  }
 
   @Get('info')
   @ApiBearerAuth()
