@@ -30,9 +30,7 @@ export class PaymentService {
       userBank = await this.bankService.createBank(
         {
           ...data.bank,
-          userId: data.userId,
-        },
-        queryRunner
+        }
       );
     }
     const event = await this.eventService.getEventByID(data.eventId);

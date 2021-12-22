@@ -172,8 +172,8 @@ export class UserService {
     };
   }
 
-  async update(userDto: UpdateUserDto, id: string){
-    const result = (await this.getUser({id: id}));
+  async update(userDto: UpdateUserDto){
+    const result = (await this.getUser({id: this.request.user.userId}));
     const user = result.data;
     if(!user) return{ statusCode: 400, message: 'User Error' }
     const role = (await this.roleRepository.findOne({name: user.role}))
