@@ -1,3 +1,5 @@
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, NotFoundException, Scope } from '@nestjs/common';
 import { Queue } from 'bull';
@@ -5,14 +7,11 @@ import { EventService } from 'src/modules/event/service/event.service';
 import { QueryRunner } from 'typeorm';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { OrderDetailEntity } from '../domain/entities/orderDetail.entity';
-import {
-  // IOrder,
-  IOrderDetail,
-} from '../domain/interfaces/IOrderDetail.interface';
+import { IOrderDetail } from '../domain/interfaces/IOrderDetail.interface';
 import { ICreateOrderDetails } from '../domain/interfaces/ITicket.interface';
+import { OrderDto } from '../dto/order.dto';
 import { OrderRepository } from '../infrastructure/repositories/order.repository';
 import { OrderDetailRepository } from '../infrastructure/repositories/orderDetail.repository';
-// import { Request } from 'express';
 
 @Injectable({ scope: Scope.REQUEST })
 export class OrderService {
@@ -20,7 +19,9 @@ export class OrderService {
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
     private readonly orderRepository: OrderRepository,
     private readonly orderDetailRepository: OrderDetailRepository,
-    private readonly eventService: EventService
+    private readonly eventService: EventService,
+    @InjectMapper()
+    private readonly mapper: Mapper
   ) {}
   async getHello(): Promise<string> {
     return 'Hello World!';
@@ -32,14 +33,20 @@ export class OrderService {
     page?: number,
     limit?: number
   ): Promise<any> {
+    console.log('orders', condition);
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       relations: relations || undefined,
       where: { ...condition },
       take: limit,
       skip: page ? (page - 1) * limit : 0,
     });
+    console.log('orders', orders);
+    const ordersMapper = orders.map((item: OrderEntity) => {
+      return this.mapper.map(item, OrderDto, OrderEntity);
+    });
+    console.log('ordersMapper', ordersMapper);
     return {
-      items: orders,
+      items: ordersMapper,
       meta: {
         totalItems: totalItems,
         itemsPerPage: Number(limit),

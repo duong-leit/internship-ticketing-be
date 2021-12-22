@@ -1,8 +1,8 @@
-import { OrderEntity } from '../entities/order.entity';
+import { OrderDto } from '../../dto/order.dto';
 import { OrderDetailEntity } from '../entities/orderDetail.entity';
 
 export interface IOrder {
-  items: OrderEntity[];
+  items: OrderDto[];
   meta: {
     totalItems: number;
     itemsPerPage: number;
