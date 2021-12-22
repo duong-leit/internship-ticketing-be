@@ -1,11 +1,9 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
   Scope,
 } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
 import { ErrorCodeEnum } from 'src/common/enums/errorCode';
 import { EventService } from 'src/modules/event/service/event.service';
 import { OrderService } from 'src/modules/order/service/order.service';
@@ -18,13 +16,14 @@ export class PaymentService {
   constructor(
     private readonly orderService: OrderService,
     private readonly eventService: EventService,
-    private readonly bankService: BankService,
-    @Inject(REQUEST) private readonly request
+    private readonly bankService: BankService
   ) {}
 
-  async handleCheckout(data: OrderRequestDto, queryRunner: QueryRunner) {
-    const buyerId =
-      this.request?.user?.userId || '8c8c134e-d9d4-413f-933d-b622e91127d8';
+  async handleCheckout(
+    data: OrderRequestDto,
+    buyerId: string,
+    queryRunner: QueryRunner
+  ) {
     const isValid = await this.orderService.validateNewOrder(
       buyerId,
       data.eventId,

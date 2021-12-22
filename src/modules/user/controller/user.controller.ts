@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiHeader,
@@ -29,8 +30,9 @@ import { transferResponse } from '../../../common/utils/transferResponse';
 import { Response } from 'express';
 import { BankService } from '../service/bank.service';
 import { AuthService } from '../../auth/service/auth.service';
-import { Public, Roles } from '../../auth/roles.decorator';
+import { Public, Roles } from '../../auth/decorators/roles.decorator';
 import { RoleEnum } from '../../role/domain/enums/role.enum';
+import { User } from 'src/modules/auth/decorators/user.decorator';
 
 @ApiTags('User')
 @Controller('user')
@@ -43,13 +45,15 @@ export class UserController {
   ) {}
 
   @Get('/info')
+  @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async getUserInfo(@Res() res: Response) {
-    const response = await this.userServices.getUserInfo();
+  async getUserInfo(@Res() res: Response, @User('userId') userId: string) {
+    const response = await this.userServices.getUserInfo(userId);
     transferResponse(res, response);
   }
 
   @Post('bank')
+  @ApiBearerAuth()
   @Roles(RoleEnum.User)
   async createBank(@Res() res: Response) {
     const userId = '49931a5e-8f15-40e9-ac99-e8cd216e839d';
@@ -65,14 +69,29 @@ export class UserController {
     transferResponse(res, response);
   }
 
-  @Get('/:bankId')
+  @Get('bank')
+  @ApiBearerAuth()
   @Roles(RoleEnum.User)
-  async getBankById(@Query('bank ID') bankId: string, @Res() res: Response) {
-    const response = await this.bankService.getBank({ id: bankId });
+  async getMyBanks(@Res() res: Response, @User('userId') userId: string) {
+    const response = await this.bankService.getBanks({ userId });
+    transferResponse(res, response);
+  }
+
+  @Get('/:bankId')
+  @ApiBearerAuth()
+  @Roles(RoleEnum.User)
+  async getBankById(
+    @Query('bank ID') bankId: string,
+    @Res() res: Response,
+    @User('userId') userId: string
+  ) {
+    const response = await this.bankService.getBank({ id: bankId, userId });
     transferResponse(res, response);
   }
 
   @Post()
+  @Roles(RoleEnum.Admin)
+  @ApiBearerAuth()
   @ApiBody({
     type: GetListUserDto,
   })
@@ -128,6 +147,7 @@ export class UserController {
     transferResponse(res, response);
   }
 
+  @Public()
   @Post('/facebookRegister')
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',

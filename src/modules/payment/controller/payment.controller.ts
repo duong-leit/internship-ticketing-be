@@ -6,7 +6,8 @@ import { Connection } from 'typeorm';
 import { transferResponse } from 'src/common/utils/transferResponse';
 import { Response } from 'express';
 import { RoleEnum } from 'src/modules/role/domain/enums/role.enum';
-import { Roles } from 'src/modules/auth/roles.decorator';
+import { Roles } from 'src/modules/auth/decorators/roles.decorator';
+import { User } from 'src/modules/auth/decorators/user.decorator';
 
 @ApiTags('Payment')
 @Roles(RoleEnum.User)
@@ -20,7 +21,11 @@ export class PaymentController {
 
   @Post()
   @ApiBody({ type: OrderRequestDto })
-  async checkoutTickets(@Body() data: OrderRequestDto, @Res() res: Response) {
+  async checkoutTickets(
+    @Body() data: OrderRequestDto,
+    @Res() res: Response,
+    @User('userId') userId: string
+  ) {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -29,6 +34,7 @@ export class PaymentController {
         {
           ...data,
         },
+        userId,
         queryRunner
       );
       queryRunner.commitTransaction();
