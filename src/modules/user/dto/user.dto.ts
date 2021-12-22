@@ -75,6 +75,50 @@ export class CreateSystemUserDto {
   password: string;
 }
 
+export class UpdateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  @ApiProperty()
+  name?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  @ApiProperty()
+  password?: string;
+
+  @IsString()
+  @Length(1, 255)
+  // @ApiProperty()
+  birthday?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  @ApiProperty()
+  gender?: GenderEnum;
+
+  @IsString()
+  @Length(1, 255)
+  @ApiProperty()
+  phoneNumber?: string;
+
+  @IsString()
+  @Length(1)
+  @ApiProperty()
+  avatarUrl?: string;
+
+  @ApiProperty()
+  avatarFile?: any;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
+  @ApiProperty()
+  role?: string;
+}
+
 export class CreateFacebookUserDto {
   @ApiProperty()
   @IsNotEmpty()

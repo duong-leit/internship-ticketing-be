@@ -1,21 +1,31 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { Queue } from 'bull';
 import { EventService } from 'src/modules/event/service/event.service';
 import { QueryRunner } from 'typeorm';
 import { OrderEntity } from '../domain/entities/order.entity';
 import { OrderDetailEntity } from '../domain/entities/orderDetail.entity';
 import {
-  IOrder,
+  // IOrder,
   IOrderDetail,
 } from '../domain/interfaces/IOrderDetail.interface';
 import { ICreateOrderDetails } from '../domain/interfaces/ITicket.interface';
 import { OrderRepository } from '../infrastructure/repositories/order.repository';
 import { OrderDetailRepository } from '../infrastructure/repositories/orderDetail.repository';
+import { REQUEST } from '@nestjs/core';
+import { ErrorCodeEnum } from 'src/common/enums/errorCode';
+// import { Request } from 'express';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class OrderService {
   constructor(
+    @Inject(REQUEST) private readonly request,
     @InjectQueue('generate-ticket-token') private generateTiket: Queue,
     private readonly orderRepository: OrderRepository,
     private readonly orderDetailRepository: OrderDetailRepository,
@@ -27,13 +37,18 @@ export class OrderService {
 
   async getOrders(
     condition?: { [field: string]: string | number },
-    relations: string[] | undefined = ['event'],
+    relations: string[] | undefined = ['event', 'orderDetail'],
     page?: number,
     limit?: number
-  ): Promise<IOrder> {
+  ): Promise<any> {
+    //IOrder
+    const userId = '8c8c134e-d9d4-413f-933d-b622e91127d8';
+    // const userId = this.request.user?.userId;
+    if (!userId) throw new BadRequestException(ErrorCodeEnum.INVALID_DATA);
+
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       relations: relations || undefined,
-      where: condition,
+      where: { ...condition, buyerId: userId },
       take: limit,
       skip: page ? (page - 1) * limit : 0,
     });
@@ -41,8 +56,8 @@ export class OrderService {
       items: orders,
       meta: {
         totalItems: totalItems,
-        itemsPerPage: limit,
-        currentPage: page,
+        itemsPerPage: Number(limit),
+        currentPage: Number(page),
       },
     };
   }
@@ -86,7 +101,9 @@ export class OrderService {
       -Number(data.amount),
       queryRunner
     );
+    //tạo 1 row trong table order
     const order = await queryRunner.manager.save(OrderEntity, data);
+    //tạo detail trong table orderDetail
     this.createOrderDetails(
       {
         amount: Number(data.amount),

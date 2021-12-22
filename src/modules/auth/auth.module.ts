@@ -16,7 +16,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [
     FacebookAuthModule.forRootAsync(facebookAuthModuleOption),
     forwardRef(()=>UserModule),
-
     RoleModule,
     JwtModule.registerAsync(jwtModuleOption),
     RoleModule,

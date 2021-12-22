@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsObject, IsString, Min } from 'class-validator';
-import { BankRequestDto } from 'src/modules/user/dto/bank.dto';
+import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 import { OrderStatusEnum } from '../../order/domain/enums/orderStatus.enum';
 
 export class OrderResponseDto {
@@ -25,20 +24,9 @@ export class OrderRequestDto {
   amount: number;
 
   @IsNotEmpty()
-  @IsObject()
-  @ApiProperty({
-    default: {
-      userId: 'af9541d5-dfef-4cfb-9e07-fe079adca878',
-      name: 'myBank',
-      cardHolderName: 'Lê Thị Mận Hồng Đào Dưa Ổi',
-      creditNumber: '321379843',
-    },
-  })
-  bank: BankRequestDto;
-
-  //fake for test
-  @IsNotEmpty()
   @IsString()
-  @ApiProperty({ description: 'fake userId from jwtToken' })
-  userId: string;
+  @ApiProperty({
+    default: 'af9541d5-dfef-4cfb-9e07-fe079adca878',
+  })
+  bankId: string;
 }
