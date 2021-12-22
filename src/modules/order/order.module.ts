@@ -13,6 +13,7 @@ import {
   REDIS_QUEUE_LIMIT_DURATION,
   REDIS_QUEUE_LIMIT_MAX,
 } from 'src/common/constant';
+import { OrderProfile } from './mapper/order.mapper';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import {
     }),
   ],
   controllers: [OrderController],
-  providers: [OrderService, GenerateTicketConsumer],
+  providers: [OrderProfile, OrderService, GenerateTicketConsumer],
   exports: [TypeOrmModule, OrderService],
 })
 export class OrderModule {}

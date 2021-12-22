@@ -5,6 +5,7 @@ import { OrderStatusEnum } from '../enums/orderStatus.enum';
 import { AppBaseEntity } from 'src/common/entities/entity';
 import { EventEntity } from 'src/modules/event/domain/entities/event.entity';
 import { OrderDetailEntity } from './orderDetail.entity';
+import { AutoMap } from '@automapper/classes';
 
 @Entity('Order')
 export class OrderEntity extends AppBaseEntity {
@@ -13,15 +14,19 @@ export class OrderEntity extends AppBaseEntity {
     enum: OrderStatusEnum,
     default: OrderStatusEnum.Progress,
   })
+  @AutoMap()
   status: OrderStatusEnum;
 
   @Column({ type: 'date', nullable: false })
+  @AutoMap()
   orderDate: string;
 
   @Column({ type: 'int', nullable: false })
+  @AutoMap()
   amount: number;
 
   @Column({ type: 'date' })
+  @AutoMap()
   paymentDate: string | null;
 
   @Column({ type: 'uuid', name: 'buyerId' })
@@ -39,15 +44,18 @@ export class OrderEntity extends AppBaseEntity {
 
   @ManyToOne(() => EventEntity, (event: EventEntity) => event.id)
   @JoinColumn({ name: 'eventId' })
+  @AutoMap({ typeFn: () => EventEntity })
   event: EventEntity;
 
   @ManyToOne(() => BankEntity, (account: BankEntity) => account.id)
   @JoinColumn({ name: 'bankId' })
+  @AutoMap({ typeFn: () => BankEntity })
   bank: BankEntity;
 
   @OneToMany(
     () => OrderDetailEntity,
     (orderDetail: OrderDetailEntity) => orderDetail.order
   )
+  @AutoMap({ typeFn: () => OrderDetailEntity })
   orderDetail: OrderDetailEntity[];
 }
