@@ -2,10 +2,12 @@ import { AppBaseEntity } from 'src/common/entities/entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { OrderEntity } from '../../../order/domain/entities/order.entity';
+import { AutoMap } from '@automapper/classes';
 
 @Entity('Bank')
 export class BankEntity extends AppBaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
+  @AutoMap()
   name!: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })

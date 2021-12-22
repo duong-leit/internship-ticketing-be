@@ -26,7 +26,7 @@ export class OrderController {
   ) {
     console.log('reqdasdasdas', userId);
     const data: IOrder = await this.orderService.getOrders(
-      { userId },
+      { buyerId: userId },
       ['event', 'orderDetail', 'bank'],
       page,
       limit
