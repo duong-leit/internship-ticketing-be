@@ -32,13 +32,14 @@ export class EventController {
     const events = this.eventService.getAll(pagination) 
   }
 
-  @Get(':id')
+  @Get('/:id')
+  @Public()
   async getEventById(
     @Param('id') eventId: string,
     @Response() res: any
   ) {
     const eventDetail = await this.eventService.getEventByID(eventId);
-    transferResponse(res, response)
+    transferResponse(res, {statusCode: 200, data: eventDetail})
   }
 
   @Get('/myEvent')
@@ -69,13 +70,11 @@ export class EventController {
     //console.log(eventInfo);
     //console.log(req.headers);
     
-    const response = await this.eventService.createEvent(eventInfo);
+    const newEvent = await this.eventService.createEvent(eventInfo);
     //console.log(response);
-    return response;
-    transferResponse(res, response);
-    console.log(res);
-    
-    
+    //return response;
+    transferResponse(res, newEvent);
+    //console.log(res);
   }
 
   @Put('/:eventId')
