@@ -1,6 +1,16 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Res } from '@nestjs/common';
 import {
-  ApiBadRequestResponse, ApiBearerAuth,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+} from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiHeader,
@@ -33,7 +43,6 @@ export class UserController {
     private readonly authService: AuthService
   ) {}
 
-
   @Get('info')
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
@@ -45,10 +54,7 @@ export class UserController {
   @Post('bank')
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async createBank(
-    @Res() res: Response,
-    @Body() bankDto: BankRequestDto
-  ) {
+  async createBank(@Res() res: Response, @Body() bankDto: BankRequestDto) {
     const response = await this.bankService.createBank(bankDto);
     if (response['error']) {
       transferResponse(res, { statusCode: 400, message: response['message'] });
@@ -72,7 +78,8 @@ export class UserController {
     @Res() res: Response
   ) {
     const response = await this.bankService.getBanks({
-      pageSize, pageIndex
+      pageSize,
+      pageIndex,
     });
     if (response['error']) {
       transferResponse(res, { statusCode: 400, message: response['message'] });
@@ -114,7 +121,6 @@ export class UserController {
     );
     transferResponse(res, response);
   }
-
 
   @Public()
   @Post('register')
@@ -169,8 +175,12 @@ export class UserController {
 
   @Put()
   @Roles(RoleEnum.User, RoleEnum.Admin)
-  async updateUser(@Body() userDto: UpdateUserDto, @Res() res: Response) {
-    const response = await this.userServices.update(userDto);
+  async updateUser(
+    @Body() userDto: UpdateUserDto,
+    @Res() res: Response,
+    @User('userId') userId: string
+  ) {
+    const response = await this.userServices.update(userDto, userId);
     transferResponse(res, response);
   }
 }
