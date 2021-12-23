@@ -81,28 +81,33 @@ export class UserService {
 
   async getUsers(
     data: { [key: string]: string | number } | undefined = undefined,
-    relations: { arrayRelation: string[] } | undefined = {
-      arrayRelation: ['role'],
-    },
-    paging: { pageSize?: number; pageIndex: number | undefined } | undefined = {
-      pageSize: 10,
-      pageIndex: 1,
-    }
+    paging: { pageSize?: number; pageIndex?: number} | undefined
   ) {
-    const dataCheck = {
+    const dataCheck = data ? {
       [Object.keys(data)[0]]: Like(`%${data[Object.keys(data)[0]]}%`),
-    };
+    } : undefined;
+
+    if(!paging){
+      const result = await this.userRepository.find(dataCheck);
+      return {
+        statusCode: 200,
+        data: UserService.transferEntityToDto(result, {
+          roleId: true,
+          password: true,
+        })
+      }
+    }
+
     const take = paging.pageSize || 10;
-    const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
+    const skip = paging.pageIndex ? paging.pageIndex*take : 0;
     const [result, total] = await this.userRepository.findAndCount({
-      relations: relations?.arrayRelation || undefined,
+      relations: ['role'],
       where: {
         ...dataCheck,
         isDeleted: false,
       },
-      // order: { name: 'DESC' },
-      take: take,
-      skip: skip === 0 ? 0 : skip * take,
+      take,
+      skip
     });
 
     return {
@@ -114,7 +119,7 @@ export class UserService {
       pagination: {
         _totalPage: Math.ceil(total / take),
         _pageSize: take,
-        _pageIndex: skip + 1,
+        _pageIndex: skip/take,
       },
     };
   }
