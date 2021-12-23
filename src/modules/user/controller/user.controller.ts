@@ -20,7 +20,6 @@ import { Recaptcha } from '@nestlab/google-recaptcha';
 import {
   CreateFacebookUserDto,
   CreateSystemUserDto,
-  GetListUserDto,
   UpdateUserDto,
   UserResponseDto,
 } from '../dto/user.dto';
@@ -87,55 +86,55 @@ export class UserController {
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
   async getBanks(
-    @Query('pageSize') pageSize: number,
-    @Query('pageIndex') pageIndex: number,
+    @Query() paging: {pageSize: string, pageIndex: string} = undefined,
     @Res() res: Response,
     @User('userId') userId: string
   ) {
+
+    if(paging // 👈 null and undefined check
+      && Object.keys(paging).length === 0
+      && Object.getPrototypeOf(paging) === Object.prototype){
+      const response = await this.bankService.getBanks(userId, undefined);
+      if (response['error']) {
+        transferResponse(res, { statusCode: 400, message: response['message'] });
+      }
+      transferResponse(res, { statusCode: 200, ...response });
+      return;
+    }
     const response = await this.bankService.getBanks(userId, {
-      pageSize,
-      pageIndex,
+      pageSize: parseInt(paging.pageSize),
+      pageIndex: parseInt(paging.pageIndex),
     });
     if (response['error']) {
       transferResponse(res, { statusCode: 400, message: response['message'] });
     }
     transferResponse(res, { statusCode: 200, ...response });
+    return;
+
+
   }
 
-  @Post()
+  @Get()
   @Roles(RoleEnum.Admin)
-  @ApiBearerAuth()
-  @ApiBody({
-    type: GetListUserDto,
-  })
-  @ApiBadRequestResponse()
-  async getUserPaging(
-    @Param() param: { id: string },
-    @Body()
-    data: {
-      filter: {
-        [key: string]: string | number;
-      };
-      pagination: {
-        pageSize: number;
-        pageIndex: number;
-      };
-    },
-    @Res() res: Response
-  ) {
-    const filter = data.filter ?? data.filter;
-    const pagination = data.pagination ?? {
-      pageSize: data.pagination?.pageSize,
-      pageIndex: data.pagination?.pageIndex,
-    };
-
-    const response = await this.userServices.getUsers(
-      { ...filter },
-      { arrayRelation: ['role'] },
-      { ...pagination }
-    );
+  async getUser(
+    @Query() paging: {pageSize: string, pageIndex: string} = undefined,
+    @Res() res: Response,
+  ){
+    if(paging // 👈 null and undefined check
+      && Object.keys(paging).length === 0
+      && Object.getPrototypeOf(paging) === Object.prototype){
+      const response = await this.userServices.getUsers(undefined, undefined);
+      transferResponse(res, response);
+      return;
+    }
+    const response = await this.userServices.getUsers(undefined, {
+      pageSize: parseInt(paging.pageSize),
+      pageIndex: parseInt(paging.pageIndex)
+    });
     transferResponse(res, response);
+    return;
   }
+
 
   @Public()
   @Post('register')

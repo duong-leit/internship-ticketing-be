@@ -22,26 +22,30 @@ export class BankService {
 
   async getBanks(
     userId: string,
-    { pageSize = 3, pageIndex = 0 }: { pageSize: number; pageIndex: number }
-  ): Promise<
-    | {
-        data: BankEntity[];
-        pagination: { totalPage: number; pageSize: number; pageIndex: number };
-      }
-    | { error: boolean; message: string }
-  > {
+    paging: { pageSize?: number; pageIndex?: number} | undefined
+  ){
     if (!userId) return { error: true, message: 'User is invalid' };
+
+    if(!paging){
+      const result = await this.bankRepository.find()
+      return {
+        data: result
+      }
+    }
+    const take = paging.pageSize || 10;
+    const skip = paging.pageIndex ? paging.pageIndex*take : 0;
+
     const [result, total] = await this.bankRepository.findAndCount({
       where: { userId: userId },
-      take: pageSize,
-      skip: pageIndex * pageSize,
+      take,
+      skip
     });
     return {
       data: result,
       pagination: {
-        totalPage: Math.ceil(total / pageSize),
-        pageIndex: parseInt(String(pageIndex)),
-        pageSize: parseInt(String(pageSize)),
+        totalPage: Math.ceil(total / take),
+        pageIndex: take,
+        pageSize: skip/take,
       },
     };
   }
