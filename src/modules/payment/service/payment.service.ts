@@ -32,6 +32,7 @@ export class PaymentService {
     if (!isValid) {
       throw new BadRequestException(ErrorCodeEnum.INVALID_DATA);
     }
+
     const userBank: any = await this.bankService.getBank({
       id: data.bankId,
     });
@@ -44,6 +45,7 @@ export class PaymentService {
       throw new BadRequestException(ErrorCodeEnum.NOT_FOUND_EVENT);
     }
 
+    const currentDate = new Date().toISOString();
     const newOrder = await this.orderService.createOrder(
       {
         eventId: data.eventId,
@@ -51,8 +53,8 @@ export class PaymentService {
         sellerId: event.userId,
         buyerId: buyerId,
         status: OrderStatusEnum.Done,
-        orderDate: new Date().toISOString(),
-        paymentDate: new Date().toISOString(),
+        orderDate: currentDate,
+        paymentDate: currentDate,
         bankId: userBank.data.id,
         amount: data.amount,
       },

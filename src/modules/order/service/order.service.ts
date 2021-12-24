@@ -42,6 +42,7 @@ export class OrderService {
     const ordersMapper = orders.map((item: OrderEntity) => {
       return this.mapper.map(item, OrderDto, OrderEntity);
     });
+    console.log('orders', orders);
     return {
       items: ordersMapper,
       meta: {
@@ -91,9 +92,9 @@ export class OrderService {
       -Number(data.amount),
       queryRunner
     );
-    //tạo 1 row trong table order
+
     const order = await queryRunner.manager.save(OrderEntity, data);
-    //tạo detail trong table orderDetail
+
     this.createOrderDetails(
       {
         amount: Number(data.amount),
@@ -104,6 +105,7 @@ export class OrderService {
       },
       queryRunner
     );
+
     return order;
   }
 
