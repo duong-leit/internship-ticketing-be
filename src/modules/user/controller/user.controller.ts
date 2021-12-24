@@ -1,6 +1,7 @@
 import {
   Body,
-  Controller, Delete,
+  Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -44,13 +45,6 @@ export class UserController {
     private readonly authService: AuthService
   ) {}
 
-  @Get()
-  @ApiBearerAuth()
-  @Roles(RoleEnum.User, RoleEnum.Admin)
-  async test(@User('userId') userId: string) {
-    return await this.walletServices.createWallet(userId);
-  }
-
   @Get('info')
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
@@ -89,9 +83,11 @@ export class UserController {
     @Res() res: Response,
     @User('userId') userId: string
   ) {
-    if(paging // 👈 null and undefined check
-      && Object.keys(paging).length === 0
-      && Object.getPrototypeOf(paging) === Object.prototype){
+    if (
+      paging && // 👈 null and undefined check
+      Object.keys(paging).length === 0 &&
+      Object.getPrototypeOf(paging) === Object.prototype
+    ) {
       const response = await this.bankService.getBanks(userId, undefined);
       if (response['error']) {
         transferResponse(res, {
@@ -194,7 +190,6 @@ export class UserController {
     @Res() res: Response,
     @User('userId') userId: string
   ) {
-
     const response = await this.userServices.update(userDto, userId);
     transferResponse(res, response);
   }
@@ -212,13 +207,13 @@ export class UserController {
 
   @Delete(':id')
   @Roles(RoleEnum.Admin)
-  async deleteUserById(
-    @Param('id') id: string,
-    @Res() res: Response,
-  ){
-    const response = await this.userServices.update({
-      isDeleted: true
-    }, id);
+  async deleteUserById(@Param('id') id: string, @Res() res: Response) {
+    const response = await this.userServices.update(
+      {
+        isDeleted: true,
+      },
+      id
+    );
     transferResponse(res, response);
   }
 }
