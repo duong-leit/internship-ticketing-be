@@ -77,19 +77,21 @@ export class CreateSystemUserDto {
 
 export class UpdateUserDto {
   @IsString()
-  @IsNotEmpty()
   @Length(1, 255)
   @ApiProperty()
+  @IsOptional()
   name?: string;
 
   @IsString()
-  @IsNotEmpty()
   @Length(1, 255)
   @ApiProperty()
+  @IsOptional()
   password?: string;
 
   @IsString()
   @Length(1, 255)
+  @IsOptional()
+
   // @ApiProperty()
   birthday?: string;
 
@@ -97,25 +99,29 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @Length(1, 255)
   @ApiProperty()
+  @IsOptional()
   gender?: GenderEnum;
 
   @IsString()
   @Length(1, 255)
   @ApiProperty()
+  @IsOptional()
   phoneNumber?: string;
 
   @IsString()
   @Length(1)
   @ApiProperty()
+  @IsOptional()
   avatarUrl?: string;
 
   @ApiProperty()
+  @IsOptional()
   avatarFile?: any;
 
   @IsString()
-  @IsNotEmpty()
   @Length(1, 255)
   @ApiProperty()
+  @IsOptional()
   role?: string;
 }
 

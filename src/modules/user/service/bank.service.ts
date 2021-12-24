@@ -22,30 +22,30 @@ export class BankService {
 
   async getBanks(
     userId: string,
-    paging: { pageSize?: number; pageIndex?: number} | undefined
-  ){
+    paging: { pageSize?: number; pageIndex?: number } | undefined
+  ) {
     if (!userId) return { error: true, message: 'User is invalid' };
 
-    if(!paging){
-      const result = await this.bankRepository.find()
+    if (!paging) {
+      const result = await this.bankRepository.find({ userId });
       return {
-        data: result
-      }
+        data: result,
+      };
     }
     const take = paging.pageSize || 10;
-    const skip = paging.pageIndex ? paging.pageIndex*take : 0;
+    const skip = paging.pageIndex ? paging.pageIndex * take : 0;
 
     const [result, total] = await this.bankRepository.findAndCount({
       where: { userId: userId },
       take,
-      skip
+      skip,
     });
     return {
       data: result,
       pagination: {
         totalPage: Math.ceil(total / take),
         pageIndex: take,
-        pageSize: skip/take,
+        pageSize: skip / take,
       },
     };
   }
