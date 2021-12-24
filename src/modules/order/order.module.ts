@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderService } from './service/order.service';
 import { BullModule } from '@nestjs/bull';
 import { GenerateTicketConsumer } from './infrastructure/ticket.consumer';
-import processor from './infrastructure/ticket.processor';
 import { EventModule } from '../event/event.module';
 import { OrderRepository } from './infrastructure/repositories/order.repository';
 import { OrderDetailRepository } from './infrastructure/repositories/orderDetail.repository';
@@ -13,6 +12,8 @@ import {
   REDIS_QUEUE_LIMIT_DURATION,
   REDIS_QUEUE_LIMIT_MAX,
 } from 'src/common/constant';
+import { UserModule } from '../user/user.module';
+import { ShareModule } from '../share/share.module';
 import { OrderProfile } from './mapper/order.mapper';
 
 @Module({
@@ -34,8 +35,9 @@ import { OrderProfile } from './mapper/order.mapper';
     }),
     BullModule.registerQueue({
       name: 'generate-ticket-token',
-      processors: [processor],
     }),
+    UserModule,
+    ShareModule,
   ],
   controllers: [OrderController],
   providers: [OrderProfile, OrderService, GenerateTicketConsumer],

@@ -47,8 +47,8 @@ export const googleRecaptchaModuleOption = {
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
     secretKey: configService.get('recaptchaSecretKey'),
-    response: (req) => (req.body.recaptcha || ''),
-    // skipIf: process.env.NODE_ENV !== 'production',
+    response: (req) => req.body.recaptcha || '',
+    skipIf: process.env.NODE_ENV !== 'production',
     actions: ACTION_RECAPTCHA,
     score: SCORE_RECAPTCHA,
   }),

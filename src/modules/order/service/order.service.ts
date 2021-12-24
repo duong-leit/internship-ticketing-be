@@ -100,7 +100,10 @@ export class OrderService {
     this.createOrderDetails(
       {
         amount: Number(data.amount),
-        orderId: String(order.id),
+        orderId: order.id as string,
+        ticketImage: data.ticketImage as string,
+        sellerId: data.sellerId as string,
+        buyerId: data.buyerId as string,
       },
       queryRunner
     );
@@ -122,7 +125,10 @@ export class OrderService {
     for (let count = 0; count < data.amount; count++) {
       await this.generateTiket.add('generate', {
         orderId: data.orderId,
+        ticketImage: data.ticketImage,
         orderDetailId: orderDetails[count],
+        sellerId: data.sellerId,
+        buyerId: data.buyerId,
       });
     }
   }
