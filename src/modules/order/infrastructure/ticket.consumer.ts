@@ -22,7 +22,6 @@ export class GenerateTicketConsumer {
       buyerId: string;
     }>
   ) {
-    // try {
     const walletFrom = await this.walletService.getWallet(job.data.sellerId);
     const walletTo = await this.walletService.getWallet(job.data.buyerId);
     const xpubSeller = walletFrom.walletAddress;
@@ -45,8 +44,5 @@ export class GenerateTicketConsumer {
       { orderId: job.data.orderId, id: job.data.orderDetailId },
       { nftToken: NFTToken }
     );
-    // } catch (error) {
-    //   console.log('generate-ticket-token', error);
-    // }
   }
 }

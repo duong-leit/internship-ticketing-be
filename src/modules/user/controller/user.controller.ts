@@ -48,7 +48,6 @@ export class UserController {
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
   async test(@User('userId') userId: string) {
-    console.log('userId', userId);
     return await this.walletServices.createWallet(userId);
   }
 
@@ -86,17 +85,21 @@ export class UserController {
   @ApiBearerAuth()
   @Roles(RoleEnum.User, RoleEnum.Admin)
   async getBanks(
-    @Query() paging: {pageSize: string, pageIndex: string} = undefined,
+    @Query() paging: { pageSize: string; pageIndex: string } = undefined,
     @Res() res: Response,
     @User('userId') userId: string
   ) {
-
-    if(paging // 👈 null and undefined check
-      && Object.keys(paging).length === 0
-      && Object.getPrototypeOf(paging) === Object.prototype){
+    if (
+      paging && // 👈 null and undefined check
+      Object.keys(paging).length === 0 &&
+      Object.getPrototypeOf(paging) === Object.prototype
+    ) {
       const response = await this.bankService.getBanks(userId, undefined);
       if (response['error']) {
-        transferResponse(res, { statusCode: 400, message: response['message'] });
+        transferResponse(res, {
+          statusCode: 400,
+          message: response['message'],
+        });
       }
       transferResponse(res, { statusCode: 200, ...response });
       return;
@@ -110,31 +113,30 @@ export class UserController {
     }
     transferResponse(res, { statusCode: 200, ...response });
     return;
-
-
   }
 
   @Get()
   @Roles(RoleEnum.Admin)
   async getUser(
-    @Query() paging: {pageSize: string, pageIndex: string} = undefined,
-    @Res() res: Response,
-  ){
-    if(paging // 👈 null and undefined check
-      && Object.keys(paging).length === 0
-      && Object.getPrototypeOf(paging) === Object.prototype){
+    @Query() paging: { pageSize: string; pageIndex: string } = undefined,
+    @Res() res: Response
+  ) {
+    if (
+      paging && // 👈 null and undefined check
+      Object.keys(paging).length === 0 &&
+      Object.getPrototypeOf(paging) === Object.prototype
+    ) {
       const response = await this.userServices.getUsers(undefined, undefined);
       transferResponse(res, response);
       return;
     }
     const response = await this.userServices.getUsers(undefined, {
       pageSize: parseInt(paging.pageSize),
-      pageIndex: parseInt(paging.pageIndex)
+      pageIndex: parseInt(paging.pageIndex),
     });
     transferResponse(res, response);
     return;
   }
-
 
   @Public()
   @Post('register')
