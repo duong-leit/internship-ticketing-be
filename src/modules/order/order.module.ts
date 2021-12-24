@@ -14,6 +14,7 @@ import {
 } from 'src/common/constant';
 import { UserModule } from '../user/user.module';
 import { ShareModule } from '../share/share.module';
+import { OrderProfile } from './mapper/order.mapper';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { ShareModule } from '../share/share.module';
     ShareModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService, GenerateTicketConsumer],
+  providers: [OrderProfile, OrderService, GenerateTicketConsumer],
   exports: [TypeOrmModule, OrderService],
 })
 export class OrderModule {}
