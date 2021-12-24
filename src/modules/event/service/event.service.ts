@@ -81,7 +81,6 @@ export class EventService {
   ) {
     const take = paging.pageSize || 10;
     const skip = paging.pageIndex ? paging.pageIndex - 1 : 0;
-    //console.log(dataCheck);
 
     const [result, total] = await this.eventRepository.findAndCount({
       //relations: relations?.arrayRelation || undefined,
@@ -204,7 +203,6 @@ export class EventService {
     });
     return { statusCode: 200, data: { id: updatedEvent.id } };
     //this.responeSuccessMessage(201, "Event updated successfully", {id: event.id})
-    //console.log(error);
     //this.responeErrorMessage(400, "Cannot update event");
   }
 }

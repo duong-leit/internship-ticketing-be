@@ -33,18 +33,15 @@ export class OrderService {
     page?: number,
     limit?: number
   ): Promise<any> {
-    console.log('orders', condition);
     const [orders, totalItems] = await this.orderRepository.findAndCount({
       relations: relations || undefined,
       where: { ...condition },
       take: limit,
       skip: page ? (page - 1) * limit : 0,
     });
-    console.log('orders', orders);
     const ordersMapper = orders.map((item: OrderEntity) => {
       return this.mapper.map(item, OrderDto, OrderEntity);
     });
-    console.log('ordersMapper', ordersMapper);
     return {
       items: ordersMapper,
       meta: {
