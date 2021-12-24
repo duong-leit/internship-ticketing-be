@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller,
+  Controller, Delete,
   Get,
   Param,
   Post,
@@ -80,7 +80,6 @@ export class UserController {
     @Res() res: Response,
     @User('userId') userId: string
   ) {
-
     if(paging // 👈 null and undefined check
       && Object.keys(paging).length === 0
       && Object.getPrototypeOf(paging) === Object.prototype){
@@ -184,7 +183,31 @@ export class UserController {
     @Res() res: Response,
     @User('userId') userId: string
   ) {
+
     const response = await this.userServices.update(userDto, userId);
+    transferResponse(res, response);
+  }
+
+  @Put(':id')
+  @Roles(RoleEnum.Admin)
+  async updateUserById(
+    @Body() userDto: UpdateUserDto,
+    @Res() res: Response,
+    @Param() id: string
+  ) {
+    const response = await this.userServices.update(userDto, id);
+    transferResponse(res, response);
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.Admin)
+  async deleteUserById(
+    @Param('id') id: string,
+    @Res() res: Response,
+  ){
+    const response = await this.userServices.update({
+      isDeleted: true
+    }, id);
     transferResponse(res, response);
   }
 }

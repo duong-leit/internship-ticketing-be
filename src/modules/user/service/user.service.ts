@@ -45,6 +45,7 @@ export class UserService {
       avatarUrl: !ignore['avatarUrl'] ? _user.avatarUrl : undefined,
       isSocial: !ignore['isSocial'] ? _user.isSocial : undefined,
       role: !ignore['role'] ? _user.role?.name : undefined,
+      isDeleted: !ignore['isDeleted'] ? _user.isDeleted : undefined,
       roleId: !ignore['roleId'] ? _user.roleId : undefined,
     }));
   }
@@ -88,7 +89,10 @@ export class UserService {
     } : undefined;
 
     if(!paging){
-      const result = await this.userRepository.find(dataCheck);
+      const result = await this.userRepository.find({
+        ...dataCheck,
+        isDeleted: false
+      });
       return {
         statusCode: 200,
         data: UserService.transferEntityToDto(result, {
@@ -182,20 +186,21 @@ export class UserService {
   async update(userDto: UpdateUserDto, userId: string) {
     const result = await this.getUser({ id: userId });
     const user = result.data;
+
     if (!user) return { statusCode: 400, message: 'User Error' };
     const role = await this.roleRepository.findOne({ name: user.role });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { createdAt, updatedAt, ...res } = user;
     const newUser: UserEntity = await this.userRepository.save({
       ...res,
+      isDeleted: userDto.isDeleted,
       role: role,
+      roleId: role.id,
       name: userDto.name ? userDto.name : user.name,
-      password:
-        userDto.password === user.password
-          ? user.password
-          : await bcrypt.hash(userDto.password, SALT_OR_ROUNDS),
-      birthday: userDto.birthday ? userDto.birthday : user.birthday,
-      gender: userDto.gender ? userDto.gender : user.gender,
+      password: !userDto.password ? res.password :
+        userDto.password === res.password ? res.password : await bcrypt.hash(userDto.password, SALT_OR_ROUNDS),
+      birthday: userDto.birthday ? userDto.birthday : res.birthday,
+      gender: userDto.gender ? userDto.gender : res.gender,
       phoneNumber: userDto.phoneNumber ? userDto.phoneNumber : user.phoneNumber,
     });
 

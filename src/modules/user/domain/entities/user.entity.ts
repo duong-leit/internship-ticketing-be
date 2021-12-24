@@ -35,7 +35,7 @@ export class UserEntity extends AppBaseEntity {
   @Column({ type: 'boolean', default: 0 })
   isSocial: boolean;
 
-  @Column({ type: 'boolean', default: 0 })
+  @Column({ type: Boolean, default: false })
   isDeleted: boolean;
   //nullable: true?
   @Column({ type: 'uuid', name: 'roleId', nullable: true })
