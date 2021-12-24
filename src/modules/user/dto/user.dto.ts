@@ -123,6 +123,9 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsOptional()
   role?: string;
+
+  @ApiProperty()
+  isDeleted?: boolean;
 }
 
 export class CreateFacebookUserDto {
