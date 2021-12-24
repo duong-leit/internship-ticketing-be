@@ -115,6 +115,9 @@ export class PaginationDto {
 
 export class EventHeaderDto {
   @AutoMap()
+  id: string;
+
+  @AutoMap()
   name: string;
 
   @AutoMap()
