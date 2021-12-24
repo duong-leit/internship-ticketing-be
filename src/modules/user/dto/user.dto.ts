@@ -113,10 +113,12 @@ export class UpdateUserDto {
   avatarFile?: any;
 
   @IsString()
-  @IsNotEmpty()
   @Length(1, 255)
   @ApiProperty()
   role?: string;
+
+  @ApiProperty()
+  isDeleted?: boolean;
 }
 
 export class CreateFacebookUserDto {
