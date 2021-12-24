@@ -47,6 +47,8 @@ export class PaymentService {
     const newOrder = await this.orderService.createOrder(
       {
         eventId: data.eventId,
+        ticketImage: event.ticketImageUrl || '',
+        sellerId: event.userId,
         buyerId: buyerId,
         status: OrderStatusEnum.Done,
         orderDate: new Date().toISOString(),

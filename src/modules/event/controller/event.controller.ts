@@ -61,7 +61,6 @@ export class EventController {
     @Response() res: any,
     @User('userId') userId: string
   ) {
-    console.log('userId', userId);
     const newEvent = await this.eventService.createEvent({
       ...eventInfo,
       userId,
