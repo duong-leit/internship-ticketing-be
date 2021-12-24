@@ -11,12 +11,15 @@ export class WalletService {
   ) {}
 
   async createWallet(userId: string) {
-    const { mnemonic, xpub } = await this.tatumService.generateWallet(userId);
+    const { mnemonic, xpub } = await this.tatumService.generateWallet();
     const wallet = this.walletRepository.save({
       mnemonic,
       walletAddress: xpub,
       userId,
     });
     return wallet;
+  }
+  async getWallet(userId: string) {
+    return await this.walletRepository.findOne({ userId });
   }
 }

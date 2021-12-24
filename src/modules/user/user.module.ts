@@ -32,6 +32,6 @@ import { WalletService } from './service/wallet.service';
   ],
   controllers: [UserController],
   providers: [UserService, BankService, WalletService],
-  exports: [TypeOrmModule, UserService, BankService],
+  exports: [TypeOrmModule, UserService, BankService, WalletService],
 })
 export class UserModule {}
