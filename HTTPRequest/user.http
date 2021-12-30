@@ -1,0 +1,18 @@
+GET {{HOST}}user/bank?pageSize=3&pageIndex=0
+Authorization: Bearer {{auth_token}}
+###
+GET {{HOST}}user/bank
+Authorization: Bearer {{auth_token}}
+###
+GET {{HOST}}user?pageSize=5&pageIndex=1
+Authorization: Bearer {{auth_token}}
+###
+GET {{HOST}}user
+Authorization: Bearer {{auth_token}}
+###
+DELETE {{HOST}}user/89544c44-c807-4f1a-acc5-020b376a9112
+Authorization: Bearer {{auth_token}}
+###
+heroku pg:reset DATABASE_URL --app nft-ticketting
+
+heroku pg:push Login DATABASE_URL --app nft-ticketting

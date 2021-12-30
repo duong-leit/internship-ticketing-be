@@ -1,3 +1,40 @@
+import { RoleEntity } from '../../../role/domain/entities/role.entity';
+import { GenderEnum } from '../enums/gender.enum';
+
 export interface IUser {
-  find(params: any): Promise<any>;
+  id? : string;
+
+  email?: string;
+
+  name?: string;
+
+  username?: string;
+
+  password?: string;
+
+  birthday?: string;
+
+  gender?: GenderEnum;
+
+  phoneNumber?: string;
+
+  avatarUrl?: string;
+
+  roleId?: string;
+
+  role?: RoleEntity;
+
+  createdAt? : string;
+
+  updatedAt? : string;
+
+  isSocial?: boolean;
+}
+
+export interface IJwtUser{
+  userId: string;
+
+  email: string;
+  
+  role: string;
 }

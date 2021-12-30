@@ -2,15 +2,32 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  //using global for every controller and every route handler
-  const config = new DocumentBuilder().setTitle('nft-tiketing').setVersion('1.0').build();
+
+  // main config
+  app.setGlobalPrefix('api');
+  app.enableCors();
+  app.useGlobalPipes(new ValidationPipe());
+
+  // swagger config
+  const config = new DocumentBuilder()
+    .setTitle('NTF Ticketing')
+    .addBearerAuth()
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('swagger', app, document);
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  await app.listen(3000);
+  // config port
+  const configService = app.select(ConfigModule).get(ConfigService);
+  await app.listen(configService.get('port'));
 }
-bootstrap();
+bootstrap().then(() => {
+  console.log('Started');
+});

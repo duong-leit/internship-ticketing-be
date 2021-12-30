@@ -2,8 +2,11 @@
 /dist
 /node_modules
 .env.development
-.env.production
 .env.staging
+/environments/.env.production
+/environments/.env.development
+
+/remove
 
 # Logs
 logs
